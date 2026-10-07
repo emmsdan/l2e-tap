@@ -21,21 +21,21 @@ const AUTH_TOKEN =
 export function getApiHeaders(customKey?: string, customMode?: "x-api-key" | "bearer") {
   const key = customKey || API_KEY;
   const token = customKey || AUTH_TOKEN;
-  
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
 
-  if (customMode === "bearer") {
-    headers["Authorization"] = `Bearer ${token}`;
-  } else if (customMode === "x-api-key") {
-    headers["X-Api-Key"] = key;
-  } else {
-    // Provide both by default to ensure maximum server compatibility
-    headers["X-Api-Key"] = key;
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  // if (customMode === "bearer") {
+  //   headers["Authorization"] = `Bearer ${token}`;
+  // } else if (customMode === "x-api-key") {
+  //   headers["X-Api-Key"] = key;
+  // } else {
+  // }
+  // Provide both by default to ensure maximum server compatibility
+  headers["X-Api-Key"] = key;
+  headers["Authorization"] = `Bearer ${token}`;
 
   return headers;
 }
