@@ -14,7 +14,7 @@ import { useL2E } from "@/lib/l2e";
 import { toast } from "sonner";
 
 const NAV = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/pos", label: "Tap2Pay", icon: ShoppingCart },
   { to: "/students", label: "Students", icon: Users },
   { to: "/prices", label: "Pricing", icon: Tags },
@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // Using explicit NO DARKMODE strategy. Colors are forced into the light-mode/sidebar-blue style.
 
-  if (pathname.startsWith("/portal") || pathname.startsWith("/pos")) {
+  if (pathname === "/" || pathname.startsWith("/portal") || pathname.startsWith("/pos")) {
     return <main className="font-sans min-h-screen bg-slate-50">{children}</main>;
   }
 

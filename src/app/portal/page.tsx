@@ -56,6 +56,11 @@ export default function StudentPortal() {
           <span className="text-lg font-bold font-sans tracking-tight text-[#0b2866]">LEARN2EARN</span>
           <span className="text-sm font-medium font-sans tracking-tight text-slate-500 mt-0.5">Student Portal</span>
         </div>
+        <div className="ml-auto">
+          <Button variant="ghost" size="sm" asChild className="text-slate-500 hover:text-slate-800">
+            <a href="/">← Return home</a>
+          </Button>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
