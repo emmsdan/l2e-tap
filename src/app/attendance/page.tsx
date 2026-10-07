@@ -14,25 +14,25 @@ export default function Attendance() {
   const [reason, setReason] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  
+
   const rows = useMemo(() => taps.filter((t) =>
     (!sid || (t.student_id ?? "").toLowerCase().includes(sid.toLowerCase())) &&
     (decision === "all" || t.decision === decision) &&
     (reason === "all" || t.reason === reason) &&
     (!from || t.at.slice(0, 10) >= from) && (!to || t.at.slice(0, 10) <= to)), [taps, sid, decision, reason, from, to]);
-    
+
   const denyCounts = (Object.keys(REASON_INFO) as DenyReason[]).map((r) => ({ r, n: taps.filter((t) => t.reason === r).length }));
   const name = (id: string | null) => students.find((s) => s.id === id)?.full_name;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <PageHeader title="Access logs & exceptions" sub={`${taps.length} taps · ${taps.filter((t) => t.decision === "DENY").length} denied`} />
-      
+
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {denyCounts.map(({ r, n }) => (
           <button key={r} onClick={() => setReason(reason === r ? "all" : r)}
             className={cn(
-              "rounded-xl border bg-white p-4 text-left transition-all shadow-sm hover:shadow", 
+              "rounded-xl border bg-white p-4 text-left transition-all shadow-sm hover:shadow",
               reason === r ? "ring-2 ring-blue-500 border-blue-500" : "border-slate-200"
             )}>
             <p className={cn("font-mono text-3xl font-semibold", REASON_INFO[r].tone === "danger" ? "text-red-600" : "text-orange-500")}>{n}</p>
@@ -40,10 +40,10 @@ export default function Attendance() {
           </button>
         ))}
       </div>
-      
+
       <Panel className="border-slate-200 shadow-sm overflow-hidden bg-white">
         <div className="flex flex-wrap gap-3 border-b border-slate-100 bg-slate-50 p-4">
-          <Input placeholder="Student ID" value={sid} onChange={(e) => setSid(e.target.value)} className="w-36 font-mono bg-white border-slate-200" />
+          <Input placeholder="Student ID or Email address" value={sid} onChange={(e) => setSid(e.target.value)} className="w-56 font-mono bg-white border-slate-200" />
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-40 bg-white border-slate-200" />
           <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-40 bg-white border-slate-200" />
           <Select value={decision} onValueChange={setDecision}>
@@ -62,7 +62,7 @@ export default function Attendance() {
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-slate-100 bg-slate-50">
@@ -80,7 +80,7 @@ export default function Attendance() {
                 return (
                   <tr key={t.id} className={cn(
                     "hover:bg-slate-50/50 transition-colors",
-                    tone === "danger" && "bg-red-50/50 hover:bg-red-50", 
+                    tone === "danger" && "bg-red-50/50 hover:bg-red-50",
                     tone === "warning" && "bg-orange-50/50 hover:bg-orange-50"
                   )}>
                     <td className={td + " font-mono text-xs text-slate-600"}>{t.at.replace("T", " ").slice(0, 16)}</td>
@@ -91,7 +91,7 @@ export default function Attendance() {
                     <td className={td + " text-slate-600 text-sm"}>{t.device}</td>
                     <td className={td}>
                       <Pill tone={t.decision === "ALLOW" ? "success" : tone === "warning" ? "warning" : "danger"}
-                            className={t.decision === "ALLOW" ? "bg-green-100 text-green-700 border-green-200" : ""}>
+                        className={t.decision === "ALLOW" ? "bg-green-100 text-green-700 border-green-200" : ""}>
                         {t.decision}
                       </Pill>
                     </td>

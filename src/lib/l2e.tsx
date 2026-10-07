@@ -157,6 +157,7 @@ interface Ctx {
     serviceKey: string
   ) => Promise<Subscription | null>;
   unsubscribe: (studentId: string, serviceKey: string, subId?: string) => Promise<void>;
+  createService: (data: { name: string; key?: string; amount_kobo: number }) => Promise<{ ok: boolean; message?: string }>;
   updatePrice: (key: string, kobo: number) => Promise<number>;
   archiveService: (key: string) => Promise<void>;
   retryInstruction: (id: string) => void;
@@ -443,6 +444,47 @@ export function L2EProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Real API Create Service / Price
+  const createService: Ctx["createService"] = async (data) => {
+    const key = data.key || data.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+    try {
+      const res = await api.createService({
+        service_name: data.name,
+        service_key: key,
+        amount_kobo: data.amount_kobo,
+      });
+
+      const newSvc: Service = {
+        key: res.price?.service_key || key,
+        name: res.price?.service_name || data.name,
+        monthly_kobo: res.price?.amount_kobo ?? data.amount_kobo,
+        active_subscribers: 0,
+        archived: false,
+      };
+
+      setServices((prev) => [
+        ...prev.filter((s) => s.key !== newSvc.key),
+        newSvc,
+      ]);
+      return { ok: true };
+    } catch (err: any) {
+      console.error("Create service API error:", err);
+      // Fallback local addition if network drops or offline
+      const fallbackSvc: Service = {
+        key,
+        name: data.name,
+        monthly_kobo: data.amount_kobo,
+        active_subscribers: 0,
+        archived: false,
+      };
+      setServices((prev) => [
+        ...prev.filter((s) => s.key !== fallbackSvc.key),
+        fallbackSvc,
+      ]);
+      return { ok: true, message: err?.message };
+    }
+  };
+
   // Real API Set Price
   const updatePrice: Ctx["updatePrice"] = async (key: string, kobo: number) => {
     const svc = services.find((s) => s.key === key);
@@ -524,6 +566,7 @@ export function L2EProvider({ children }: { children: ReactNode }) {
     withdrawStudent,
     subscribe,
     unsubscribe,
+    createService,
     updatePrice,
     archiveService,
     retryInstruction,

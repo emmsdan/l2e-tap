@@ -9,19 +9,19 @@ import { useL2E, formatNaira, type Service, type Student } from "@/lib/l2e";
 
 export default function StudentPortal() {
   const { students, services, subscribe } = useL2E();
-  
+
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [studentIdInput, setStudentIdInput] = useState("");
   const [student, setStudent] = useState<Student | null>(null);
   const [error, setError] = useState("");
-  
+
   const [selectedServiceKey, setSelectedServiceKey] = useState<string>("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!studentIdInput.trim()) return;
-    
+
     const found = students.find(s => s.id.toLowerCase() === studentIdInput.toLowerCase().trim());
     if (found) {
       if (found.status === "WITHDRAWN") {
@@ -31,7 +31,7 @@ export default function StudentPortal() {
         setStep(2);
       }
     } else {
-      setError("Student ID not found. Please try again.");
+      setError("Student ID or Email address not found. Please try again.");
     }
   };
 
@@ -40,7 +40,7 @@ export default function StudentPortal() {
     await subscribe(student.id, selectedServiceKey);
     setStep(3);
   };
-  
+
   const selectedService = services.find(s => s.key === selectedServiceKey);
 
   return (
@@ -64,23 +64,23 @@ export default function StudentPortal() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
-        
+
         {step === 1 && (
           <div className="w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-slate-800">Welcome to Tap2Pay</h1>
-              <p className="text-slate-500 mt-2">Enter your Student ID to manage your subscriptions.</p>
+              <p className="text-slate-500 mt-2">Enter your Student ID or Email address to manage your subscriptions.</p>
             </div>
-            
+
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Student ID</label>
+                <label className="text-sm font-medium text-slate-700">Student ID or Email address</label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 size-5 text-slate-400" />
-                  <Input 
-                    value={studentIdInput} 
-                    onChange={e => setStudentIdInput(e.target.value)} 
-                    placeholder="e.g. L2E-1001" 
+                  <Input
+                    value={studentIdInput}
+                    onChange={e => setStudentIdInput(e.target.value)}
+                    placeholder="e.g. L2E-1001 or student@learn2earn.org"
                     className="pl-10 h-12 text-lg font-mono border-slate-300"
                     autoFocus
                   />
@@ -106,11 +106,10 @@ export default function StudentPortal() {
 
             <RadioGroup value={selectedServiceKey} onValueChange={setSelectedServiceKey} className="gap-4">
               {services.filter(s => !s.archived).map(s => (
-                <label 
-                  key={s.key} 
-                  className={`flex items-center justify-between p-5 rounded-xl border-2 transition-all cursor-pointer ${
-                    selectedServiceKey === s.key ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 hover:border-blue-300'
-                  }`}
+                <label
+                  key={s.key}
+                  className={`flex items-center justify-between p-5 rounded-xl border-2 transition-all cursor-pointer ${selectedServiceKey === s.key ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-slate-200 hover:border-blue-300'
+                    }`}
                 >
                   <div className="flex items-center gap-4">
                     <RadioGroupItem value={s.key} className="size-5" />
@@ -145,7 +144,7 @@ export default function StudentPortal() {
             <p className="text-slate-600 mb-8 max-w-sm mx-auto">
               Your request for <b>{selectedService?.name}</b> has been queued. Your access will be granted automatically as soon as Pebbles confirms the payroll deduction.
             </p>
-            
+
             <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 mb-8 text-left text-sm space-y-3">
               <div className="flex justify-between">
                 <span className="text-slate-500">Student</span>

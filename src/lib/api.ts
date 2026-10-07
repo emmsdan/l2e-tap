@@ -212,6 +212,30 @@ export const api = {
   listPrices: () =>
     apiFetch<{ prices: ApiPrice[] }>("/prices"),
 
+  createService: (data: { service_name: string; service_key?: string; amount_kobo: number }) =>
+    apiFetch<{ price: ApiPrice }>("/prices", {
+      method: "POST",
+      body: JSON.stringify({
+        service: data.service_name,
+        service_name: data.service_name,
+        service_key: data.service_key,
+        amount_kobo: data.amount_kobo,
+      }),
+    }).catch(async (err) => {
+      // Fallback to PUT /prices if backend only routes price creation via PUT /prices { service, amount_kobo }
+      if (err?.status === 404 || err?.status === 405) {
+        const fallbackRes = await apiFetch<{ price: ApiPrice; subscribers_repriced: number }>("/prices", {
+          method: "PUT",
+          body: JSON.stringify({
+            service: data.service_name,
+            amount_kobo: data.amount_kobo,
+          }),
+        });
+        return { price: fallbackRes.price };
+      }
+      throw err;
+    }),
+
   setPrice: (service: string, amount_kobo: number) =>
     apiFetch<{ price: ApiPrice; subscribers_repriced: number }>("/prices", {
       method: "PUT",

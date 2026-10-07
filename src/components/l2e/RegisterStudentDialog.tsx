@@ -31,7 +31,7 @@ export function RegisterStudentDialog({ trigger }: { trigger: ReactNode }) {
           {err && (
             <Alert variant="destructive"><AlertTriangle className="size-4" /><AlertTitle>409 · Duplicate</AlertTitle><AlertDescription>{err}</AlertDescription></Alert>
           )}
-          <div className="space-y-1.5"><Label>Student ID</Label><Input value={f.student_id} onChange={(e) => setF({ ...f, student_id: e.target.value })} placeholder="L2E-1050" className="font-mono" /></div>
+          <div className="space-y-1.5"><Label>Student ID or Email address</Label><Input value={f.student_id} onChange={(e) => setF({ ...f, student_id: e.target.value })} placeholder="L2E-1050 or student@learn2earn.org" className="font-mono" /></div>
           <div className="space-y-1.5"><Label>Full name</Label><Input value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} /></div>
           <div className="space-y-1.5">
             <Label>Card UID</Label>
