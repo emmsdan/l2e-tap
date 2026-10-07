@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useL2E } from "@/lib/l2e";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -87,16 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen font-sans bg-[#f4f7fb]">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex shadow-xl shadow-blue-900/10 z-20">
         <div className="flex items-center gap-3 px-6 py-8">
-          <div className="grid size-10 place-items-center bg-[#183980] rounded-lg text-xs font-bold font-sans tracking-tight">
-            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 20L20 10V30L10 20Z" fill="white" />
-              <path d="M30 20L20 10V30L30 20Z" fill="white" />
-            </svg>
-          </div>
-          <div className="leading-none flex flex-col">
-            <span className="text-xl font-bold font-sans tracking-tight">LEARN</span>
-            <span className="text-xl font-bold font-sans tracking-tight text-white -mt-0.5">2EARN</span>
-          </div>
+          <Image src="/logo.svg" height={32} width={90} alt="L2E Logo" priority className="filter brightness-[2292]" />
         </div>
 
         <nav className="flex-1 space-y-1.5 px-3 py-2 overflow-y-auto">

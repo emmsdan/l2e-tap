@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function LandingPage() {
   const [ssoLoading, setSsoLoading] = useState(false);
@@ -36,15 +37,9 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="grid size-11 place-items-center bg-[#0b2866] rounded-xl text-xs font-bold tracking-tight shadow-md shadow-blue-900/10">
-              <svg width="26" height="26" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 20L20 10V30L10 20Z" fill="white" />
-                <path d="M30 20L20 10V30L30 20Z" fill="white" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold font-sans tracking-tight text-[#0b2866]">LEARN2EARN</span>
-              <span className="text-xs font-semibold text-orange-600 tracking-wider uppercase -mt-0.5">
+            <Image src="/logo.svg" width={90} height={32} alt="LEARN2EARN" priority />
+            <div className="hidden sm:flex flex-col border-l border-slate-200 pl-3">
+              <span className="text-xs font-semibold text-orange-600 tracking-wider uppercase">
                 Talent Nation · Tap2Access
               </span>
             </div>
@@ -191,8 +186,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="mt-auto bg-slate-900 text-slate-400 py-10 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white font-sans">LEARN2EARN</span>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.svg" width={90} height={32} alt="LEARN2EARN" className="filter brightness-[23232]" />
             <span>·</span>
             <span>Talent Nation Campus System</span>
           </div>
