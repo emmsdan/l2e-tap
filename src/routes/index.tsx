@@ -49,8 +49,10 @@ function Overview() {
 
       {(failed > 0 || pending > 0) && (
         <div className="mt-6 grid gap-3 md:grid-cols-2">
-          {failed > 0 && <Link to="/pebbles" className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"><AlertTriangle className="size-4 text-destructive" /><span><b>{failed}</b> payroll instructions failed and need manual review</span></Link>}
-          {pending > 0 && <Link to="/students" className="flex items-center gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm"><CalendarClock className="size-4 text-warning" /><span><b>{pending}</b> subscriptions awaiting Pebbles confirmation</span></Link>}
+          {failed > 0 && <Link to="/pebbles" className="flex items-center gap-3 rounded-lg border border-destructive/30 text-red-800 p-4 text-sm">
+            <AlertTriangle className="size-4 text-destructive text-black" /><span>
+              <b>{failed}</b> payroll instructions failed and need manual review</span></Link>}
+          {pending > 0 && <Link to="/students" className="flex items-center gap-3 rounded-lg border border-warning/40 text-orange-800 bg-warning/10 p-4 text-sm"><CalendarClock className="size-4 text-warning" /><span><b>{pending}</b> subscriptions awaiting Pebbles confirmation</span></Link>}
         </div>
       )}
 

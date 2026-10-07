@@ -11,7 +11,7 @@ export default function Overview() {
   const { students, subs, taps, instructions } = useL2E();
   // Using fixed date as in original code
   const today = taps.filter((t) => t.at.startsWith("2026-10-07"));
-  
+
   const metrics = [
     { label: "Total students", value: students.length, icon: Users },
     { label: "Active subscriptions", value: subs.filter((s) => s.status === "ACTIVE").length, icon: CheckCircle2 },
@@ -29,7 +29,7 @@ export default function Overview() {
         <h1 className="text-4xl font-serif text-[#0b2866] tracking-tight">Talent Nation</h1>
         <h2 className="text-xl font-medium text-blue-600">Course: AI Engineering Fellowship</h2>
         <p className="text-slate-500 max-w-2xl mt-2">
-          A practical AI Engineering Fellowship pathway for individuals who want to build real AI engineering skill, 
+          A practical AI Engineering Fellowship pathway for individuals who want to build real AI engineering skill,
           sharpen their thinking, and learn the discipline of shipping useful work.
         </p>
       </div>
@@ -39,7 +39,7 @@ export default function Overview() {
           <RegisterStudentDialog trigger={<Button className="bg-[#0b2866] hover:bg-[#153f93]"><UserPlus className="size-4 mr-2" />Register student</Button>} />
           <Button variant="outline" asChild><Link href="/pebbles"><Scale className="size-4 mr-2" />Reconcile Pebbles</Link></Button>
         </>} />
-        
+
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {metrics.map(({ label, value, icon: Icon }) => (
           <div key={label} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
@@ -51,8 +51,9 @@ export default function Overview() {
 
       {(failed > 0 || pending > 0) && (
         <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {failed > 0 && <Link href="/pebbles" className="flex items-center gap-4 rounded-xl border border-red-200 bg-red-50 p-5 text-sm transition-colors hover:bg-red-100"><AlertTriangle className="size-5 text-red-600" /><span><b>{failed}</b> payroll instructions failed and need manual review</span></Link>}
-          {pending > 0 && <Link href="/students" className="flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-50 p-5 text-sm transition-colors hover:bg-orange-100"><CalendarClock className="size-5 text-orange-600" /><span><b>{pending}</b> subscriptions awaiting Pebbles confirmation</span></Link>}
+          {failed > 0 && <Link href="/pebbles" className="flex items-center gap-4 rounded-xl border border-red-200 bg-red-50 p-5 text-sm transition-colors hover:bg-red-100 text-red-800"><AlertTriangle className="size-5 text-black" /><span><b>{failed}</b> payroll instructions failed and need manual review</span></Link>}
+
+          {pending > 0 && <Link href="/students" className="flex items-center gap-4 rounded-xl border border-orange-200 bg-orange-50 text-orange-800 p-5 text-sm transition-colors hover:bg-orange-100"><CalendarClock className="size-5 text-orange-600" /><span><b>{pending}</b> subscriptions awaiting Pebbles confirmation</span></Link>}
         </div>
       )}
 

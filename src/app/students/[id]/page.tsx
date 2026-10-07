@@ -33,7 +33,7 @@ function SubscribeSheet({ studentId, existing }: { studentId: string; existing: 
           <div className="flex flex-1 flex-col gap-4 px-1 mt-4">
             <RadioGroup value={key} onValueChange={setKey} className="gap-3">
               {services.filter((s) => !s.archived).map((s) => (
-                <label key={s.key} className={`flex items-center justify-between rounded-lg border p-4 text-sm transition-colors ${taken.has(s.key) ? "opacity-50 border-slate-200 bg-slate-50" : "cursor-pointer hover:bg-blue-50/50 hover:border-blue-200 border-slate-200 bg-white"}`}>
+                <label key={s.key} className={`flex items-center justify-between rounded-lg border p-4 text-sm transition-colors ${taken.has(s.key) ? "opacity-50 border-slate-200 bg-slate-50" : "cursor-pointer hover:bg-blue-50 hover:border-blue-200 border-slate-200 bg-white"}`}>
                   <span className="flex items-center gap-3 font-medium text-slate-800"><RadioGroupItem value={s.key} disabled={taken.has(s.key)} />{s.name}</span>
                   <span className="font-mono text-slate-900">{formatNaira(s.monthly_kobo)}<span className="text-slate-500 font-sans">/mo</span></span>
                 </label>
@@ -103,7 +103,7 @@ export default function StudentDetail() {
         ) : <Pill tone="muted">WITHDRAWN</Pill>} />
 
       {tap2accessDown && (
-        <Alert className="mb-8 border-orange-200 bg-orange-50/80 shadow-sm">
+        <Alert className="mb-8 border-orange-200 bg-orange-50 shadow-sm">
           <WifiOff className="size-5 text-orange-600" />
           <AlertTitle className="text-orange-900 font-semibold">Tap2Access unreachable — showing local L2E data only</AlertTitle>
           <AlertDescription className="font-mono text-xs text-orange-800 mt-2">tap2access_error: "upstream timeout after 3000ms (GET /cards/{s.card_uid})"</AlertDescription>
@@ -125,7 +125,7 @@ export default function StudentDetail() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {mine.map((x) => (
-                    <tr key={x.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={x.id} className="hover:bg-slate-50 transition-colors">
                       <td className={td + " font-medium text-slate-800"}>{svc(x.service_key)?.name ?? x.service_key}</td>
                       <td className={td + " font-mono text-slate-600"}>{formatNaira(x.amount_kobo)}</td>
                       <td className={td}><SubBadge sub={x} /></td>
@@ -218,7 +218,7 @@ export default function StudentDetail() {
                     const myTaps = useL2E().taps.filter(t => t.student_id === s.id).slice(0, 5);
                     if (myTaps.length === 0) return <tr><td colSpan={3} className="p-8 text-center text-sm text-slate-500">No recent gate taps found.</td></tr>;
                     return myTaps.map((t) => (
-                      <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr key={t.id} className="hover:bg-slate-50 transition-colors">
                         <td className={td + " font-mono text-xs text-slate-600"}>{t.at.replace("T", " ").slice(0, 16)}</td>
                         <td className={td + " text-slate-700"}>{t.device}</td>
                         <td className={td}>

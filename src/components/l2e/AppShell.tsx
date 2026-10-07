@@ -56,12 +56,12 @@ function Health() {
   const [tick, setTick] = useState(0);
   useEffect(() => { const t = setInterval(() => setTick((x) => x + 1), 10000); return () => clearInterval(t); }, []);
   const items = [
-    { k: "/health", ok: true },
-    { k: "/ready", ok: !tap2accessDown },
+    { k: "health", ok: true },
+    { k: "ready", ok: !tap2accessDown },
   ];
   return (
     <div className="space-y-1.5 px-3 text-xs" data-tick={tick}>
-      <p className="px-1 text-[10px] uppercase tracking-wider text-white/50">System</p>
+      <p className="px-1 text-[10px] uppercase tracking-wider text-slate-400">System</p>
       {items.map((i) => (
         <div key={i.k} className="flex items-center justify-between rounded px-1 py-0.5">
           <span className="font-mono">{i.k}</span>
@@ -82,35 +82,35 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen font-sans bg-[#f4f7fb]">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex shadow-xl shadow-blue-900/10 z-20">
         <div className="flex items-center gap-3 px-6 py-8">
-          <div className="grid size-10 place-items-center bg-white/10 rounded-lg text-xs font-bold font-sans tracking-tight">
+          <div className="grid size-10 place-items-center bg-[#183980] rounded-lg text-xs font-bold font-sans tracking-tight">
             <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20L20 10V30L10 20Z" fill="white" />
-              <path d="M30 20L20 10V30L30 20Z" fill="white" fillOpacity="0.5" />
+              <path d="M30 20L20 10V30L30 20Z" fill="white" />
             </svg>
           </div>
           <div className="leading-none flex flex-col">
             <span className="text-xl font-bold font-sans tracking-tight">LEARN</span>
-            <span className="text-xl font-bold font-sans tracking-tight text-white/80 -mt-0.5">2EARN</span>
+            <span className="text-xl font-bold font-sans tracking-tight text-white -mt-0.5">2EARN</span>
           </div>
         </div>
-        
+
         <nav className="flex-1 space-y-1.5 px-3 py-2 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = pathname === to || (to !== '/' && pathname.startsWith(to));
             return (
               <Link key={to} href={to}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${active ? "bg-[#183980] text-white shadow-inner" : "text-white/70 hover:bg-[#183980]/50 hover:text-white"}`}>
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${active ? "bg-[#183980] text-white shadow-inner" : "text-slate-300 hover:bg-[#183980] hover:text-white"}`}>
                 {active && <div className="absolute left-0 w-1.5 h-8 bg-orange-500 rounded-r-full" />}
-                <Icon className={`size-5 ${active ? "text-orange-500" : "opacity-80"}`} />{label}
+                <Icon className={`size-5 ${active ? "text-orange-500" : "text-slate-300"}`} />{label}
               </Link>
             );
           })}
         </nav>
-        <div className="py-6 px-3 bg-black/10"><Health /></div>
+        <div className="py-6 px-3 bg-[#081d4a]"><Health /></div>
       </aside>
-      
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
           <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map(({ to, icon: Icon, label }) => (
               <Link key={to} href={to} aria-label={label} className="rounded-md p-2 text-slate-500"><Icon className="size-5" /></Link>

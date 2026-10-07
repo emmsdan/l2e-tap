@@ -39,7 +39,7 @@ export default function Prices() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {services.map((s) => (
-                <tr key={s.key} className={`hover:bg-slate-50/50 transition-colors ${s.archived ? "opacity-60 bg-slate-50/80" : ""}`}>
+                <tr key={s.key} className={`hover:bg-slate-50 transition-colors ${s.archived ? "text-slate-400 bg-slate-50" : ""}`}>
                   <td className={td}>
                     <p className="font-medium text-slate-800">{s.name}</p>
                     <p className="font-mono text-xs text-slate-500 mt-0.5">{s.key}</p>

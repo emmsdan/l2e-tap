@@ -29,10 +29,10 @@ export default function Pebbles() {
   const { instructions, retryInstruction, students } = useL2E();
   const [running, setRunning] = useState(false);
   const [ran, setRan] = useState(REPORT.generated_at);
-  
+
   const name = (id: string) => students.find((s) => s.id === id)?.full_name ?? id;
   const statusTone: Record<string, Tone> = { PENDING: "warning", SENT: "success", FAILED: "danger" };
-  
+
   const unbilled = REPORT.missing_at_pebbles.reduce((a, b) => a + b.local_kobo, 0);
   const unserviced = REPORT.unknown_locally.reduce((a, b) => a + b.pebbles_kobo, 0);
   const mismatch = REPORT.amount_mismatch.reduce((a, b) => a + Math.abs(b.local_kobo - b.pebbles_kobo), 0);
@@ -48,13 +48,13 @@ export default function Pebbles() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <PageHeader title="Payroll reconciliation" sub={`Last report ${ran.replace("T", " ")}`}
         actions={
-          <Button disabled={running} className="bg-[#0b2866] hover:bg-[#153f93]" onClick={() => { 
-            setRunning(true); 
-            setTimeout(() => { 
-              setRunning(false); 
-              setRan(new Date().toISOString().slice(0, 19)); 
-              toast.success("Reconciliation complete"); 
-            }, 1200); 
+          <Button disabled={running} className="bg-[#0b2866] hover:bg-[#153f93]" onClick={() => {
+            setRunning(true);
+            setTimeout(() => {
+              setRunning(false);
+              setRan(new Date().toISOString().slice(0, 19));
+              toast.success("Reconciliation complete");
+            }, 1200);
           }}>
             <RefreshCw className={cn("size-4 mr-2", running && "animate-spin")} />
             {running ? "Reconciling…" : "Run reconciliation"}
@@ -87,7 +87,7 @@ export default function Pebbles() {
             ))}
           </tbody></table>
         </Panel>
-        
+
         <Panel className="border-slate-200 shadow-sm bg-white" title={<span className="flex items-center gap-2"><HelpCircle className="size-4 text-orange-500" />Unserviced payments</span>}>
           <table className="w-full"><tbody className="divide-y divide-slate-100">
             {REPORT.unknown_locally.map((r) => (
@@ -101,7 +101,7 @@ export default function Pebbles() {
             ))}
           </tbody></table>
         </Panel>
-        
+
         <Panel title="Amount mismatches" className="lg:col-span-2 border-slate-200 shadow-sm bg-white">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -119,7 +119,7 @@ export default function Pebbles() {
                   </tr>
                 ))}
                 {REPORT.unreachable.map((r) => (
-                  <tr key={r.student_id} className="bg-slate-50/50">
+                  <tr key={r.student_id} className="bg-slate-50">
                     <td className={td + " font-medium text-slate-700"}>{name(r.student_id)}</td>
                     <td className={td + " text-slate-500 text-sm"} colSpan={4}><Unplug className="mr-2 inline size-3.5 opacity-50" />{r.note}</td>
                   </tr>
@@ -145,7 +145,7 @@ export default function Pebbles() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {instructions.map((i) => (
-                <tr key={i.id} className={cn("hover:bg-slate-50 transition-colors", i.status === "FAILED" && "bg-red-50/50 hover:bg-red-50")}>
+                <tr key={i.id} className={cn("hover:bg-slate-50 transition-colors", i.status === "FAILED" && "bg-red-50 hover:bg-red-100")}>
                   <td className={td + " font-mono text-xs text-slate-600"}>
                     {i.id}
                     <p className="text-slate-400 mt-0.5">{i.at.replace("T", " ").slice(0, 16)}</p>
@@ -163,8 +163,8 @@ export default function Pebbles() {
                     {i.error && <p className="mt-1.5 text-xs text-red-600 font-medium">{i.error}</p>}
                   </td>
                   <td className={td + " text-right"}>
-                    {i.status === "FAILED" && 
-                      <Button size="sm" variant="outline" className="border-slate-200 text-slate-700 hover:text-blue-600 hover:bg-blue-50" onClick={() => { retryInstruction(i.id); toast("Instruction re-queued"); }}>
+                    {i.status === "FAILED" &&
+                      <Button size="sm" variant="outline" className="border-slate-200 text-slate-200 hover:text-blue-600 hover:bg-blue-50" onClick={() => { retryInstruction(i.id); toast("Instruction re-queued"); }}>
                         <RotateCcw className="size-3.5 mr-1.5" />Retry
                       </Button>
                     }

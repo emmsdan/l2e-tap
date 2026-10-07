@@ -2,6 +2,11 @@
 @source "../src";
 @import "tw-animate-css";
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
 @theme inline {
   --font-sans: var(--font-sans), "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -53,7 +58,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.02 240);
   /* Primary: the deep blue from the sidebar #0b2866 */
-  --primary: oklch(0.3 0.1 260); 
+  --primary: oklch(0.3 0.1 260);
   --primary-foreground: oklch(0.98 0.01 160);
   --secondary: oklch(0.96 0.01 240);
   --secondary-foreground: oklch(0.2 0.02 260);
@@ -71,7 +76,7 @@
   --border: oklch(0.92 0.01 240);
   --input: oklch(0.92 0.01 240);
   --ring: oklch(0.3 0.1 260);
-  
+
   --sidebar: oklch(0.3 0.1 260);
   --sidebar-foreground: oklch(0.88 0.015 260);
   --sidebar-primary: oklch(0.72 0.14 160);
@@ -83,7 +88,10 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -95,7 +103,15 @@
 @utility pulse-dot {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
+
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
 }

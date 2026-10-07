@@ -5,11 +5,11 @@ import { REASON_INFO, type DenyReason, type SubStatus, type Subscription } from 
 import { Clock, CheckCircle2, XCircle, Ban, Info } from "lucide-react";
 
 const tones = {
-  success: "bg-success/12 text-success border-success/30",
-  warning: "bg-warning/15 text-warning-foreground dark:text-warning border-warning/40",
-  danger: "bg-destructive/10 text-destructive border-destructive/30",
-  info: "bg-info/10 text-info border-info/30",
-  muted: "bg-muted text-muted-foreground border-border",
+  success: "bg-green-100 text-green-800 border-green-200",
+  warning: "bg-orange-100 text-orange-800 border-orange-200",
+  danger: "bg-red-100 text-red-800 border-red-200",
+  info: "bg-blue-100 text-blue-800 border-blue-200",
+  muted: "bg-slate-100 text-slate-600 border-slate-200",
 } as const;
 export type Tone = keyof typeof tones;
 
@@ -54,8 +54,8 @@ export function PageHeader({ title, sub, actions }: { title: string; sub?: strin
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        {sub && <p className="mt-1 text-sm text-muted-foreground">{sub}</p>}
+        <h1 className="text-xl font-semibold tracking-tight text-[#153f93]">{title}</h1>
+        {sub && <p className="mt-1 text-sm text-slate-800">{sub}</p>}
       </div>
       {actions && <div className="flex gap-2">{actions}</div>}
     </div>
@@ -67,7 +67,7 @@ export function Panel({ title, children, actions, className }: { title?: ReactNo
     <section className={cn("rounded-lg border bg-card", className)}>
       {title && (
         <header className="flex items-center justify-between border-b px-4 py-2.5">
-          <h2 className="text-sm font-medium">{title}</h2>{actions}
+          <h2 className="text-sm font-bold text-[#153f93]">{title}</h2>{actions}
         </header>
       )}
       {children}
@@ -75,5 +75,5 @@ export function Panel({ title, children, actions, className }: { title?: ReactNo
   );
 }
 
-export const th = "px-4 py-2 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground";
+export const th = "px-4 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-slate-800";
 export const td = "px-4 py-2.5 text-sm";
