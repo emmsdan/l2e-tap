@@ -117,7 +117,7 @@ export default function LandingPage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto h-14 px-7 text-base border-slate-300 hover:bg-slate-100 text-slate-700 font-medium"
+                className="w-full sm:w-auto h-14 px-7 text-base border-slate-300 hover:bg-slate-100 text-slate-100 font-medium"
               >
                 <Link href="/portal">Student Self-Service Portal</Link>
               </Button>
@@ -181,7 +181,7 @@ export default function LandingPage() {
             >
               Access Admin Hub
             </Button>
-            <Button asChild variant="outline" className="border-slate-300">
+            <Button asChild variant="outline" className="border-slate-300 text-white">
               <Link href="/prices">View Pricing Catalogue</Link>
             </Button>
           </div>
