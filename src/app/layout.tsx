@@ -17,6 +17,18 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "L2E Campus Operations",
   description: "Learn to Earn roster, subscriptions, payroll and gate access dashboard.",
+  icons: {
+    icon: "/logo.svg",
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
+    other: [
+      {
+        url: '/logo.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+    ],
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
