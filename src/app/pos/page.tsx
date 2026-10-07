@@ -1,19 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { 
-  CreditCard, 
-  CheckCircle2, 
-  AlertCircle, 
-  ShoppingCart, 
-  Loader2, 
-  Plus, 
-  Minus, 
-  Trash2, 
-  ArrowRight, 
-  Wifi, 
-  RefreshCw, 
-  UserCheck, 
+import {
+  CreditCard,
+  CheckCircle2,
+  AlertCircle,
+  ShoppingCart,
+  Loader2,
+  Plus,
+  Minus,
+  Trash2,
+  ArrowRight,
+  Wifi,
+  RefreshCw,
+  UserCheck,
   Sparkles,
   Receipt,
   Store,
@@ -26,6 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { useL2E, normaliseCardUid, formatNaira, nairaToKobo, type Service, type Student } from "@/lib/l2e";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface CartItem {
   service: Service;
@@ -34,11 +35,11 @@ interface CartItem {
 
 export default function PointOfSale() {
   const { services, students, subscribe, createService } = useL2E();
-  
+
   // Cart state for multi-item supermarket/kiosk POS experience
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedQuickService, setSelectedQuickService] = useState<Service | null>(null);
-  
+
   // Checkout & Card Scan state
   const [isScanningModalOpen, setIsScanningModalOpen] = useState(false);
   const [cardInput, setCardInput] = useState("");
@@ -100,7 +101,7 @@ export default function PointOfSale() {
     setCart(prev => {
       const existing = prev.find(item => item.service.key === service.key);
       if (existing) {
-        return prev.map(item => 
+        return prev.map(item =>
           item.service.key === service.key ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
@@ -113,7 +114,7 @@ export default function PointOfSale() {
   };
 
   const updateQuantity = (serviceKey: string, delta: number) => {
-    setCart(prev => 
+    setCart(prev =>
       prev
         .map(item => {
           if (item.service.key === serviceKey) {
@@ -157,11 +158,11 @@ export default function PointOfSale() {
     if (!uid) return;
 
     setStatus("processing");
-    
+
     // Look up student by card_uid or fallback to student ID / email match if typed
     const trimmedRaw = rawUid.trim().toLowerCase();
-    const student = students.find(s => 
-      s.card_uid === uid || 
+    const student = students.find(s =>
+      s.card_uid === uid ||
       s.id.toLowerCase() === trimmedRaw ||
       s.full_name.toLowerCase() === trimmedRaw
     );
@@ -252,11 +253,9 @@ export default function PointOfSale() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
       {/* Top Header - Supermarket / OPay / Square POS Style */}
-      <header className="bg-[#0b2866] text-white px-6 py-3.5 flex items-center justify-between shadow-md">
+      <header className="bg-[#0b2866] text-white px-6 py-3.5 flex items-center justify-between shadow-md flex-wrap gap-5">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-white shadow-inner">
-            <Store className="size-5" />
-          </div>
+          <Image src="/logo.svg" alt="logo" width={100} height={40} className="bg-white rounded-full p-2 pr-4" />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-black tracking-wider text-white">TAP2PAY</span>
@@ -285,7 +284,7 @@ export default function PointOfSale() {
               <form onSubmit={handleQuickCreateService} className="space-y-4 py-2">
                 <div className="space-y-1.5">
                   <Label>Item / Service Name</Label>
-                  <Input 
+                  <Input
                     placeholder="e.g. Bottled Water, Daily Lunch, Gym Pass"
                     value={newServiceName}
                     onChange={(e) => setNewServiceName(e.target.value)}
@@ -296,7 +295,7 @@ export default function PointOfSale() {
                   <Label>Price (₦ Naira)</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-slate-500 font-medium">₦</span>
-                    <Input 
+                    <Input
                       type="number"
                       min="1"
                       step="0.01"
@@ -326,7 +325,7 @@ export default function PointOfSale() {
 
       {/* Main Terminal Grid */}
       <div className="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
+
         {/* Left Side: Product Catalogue / Items Grid (7 cols) */}
         <div className="lg:col-span-7 flex flex-col space-y-4">
           <div className="flex items-center justify-between bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm">
@@ -350,11 +349,10 @@ export default function PointOfSale() {
                   onClick={() => addToCart(svc)}
                   role="button"
                   tabIndex={0}
-                  className={`group relative bg-white rounded-2xl border-2 p-4 text-left transition-all duration-150 hover:shadow-md cursor-pointer flex flex-col justify-between select-none ${
-                    inCartItem 
-                      ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/10' 
-                      : 'border-slate-200 hover:border-blue-300'
-                  }`}
+                  className={`group relative bg-white rounded-2xl border-2 p-4 text-left transition-all duration-150 hover:shadow-md cursor-pointer flex flex-col justify-between select-none ${inCartItem
+                    ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/10'
+                    : 'border-slate-200 hover:border-blue-300'
+                    }`}
                 >
                   {inCartItem && (
                     <span className="absolute -top-2 -right-2 bg-blue-600 text-white size-6 rounded-full text-xs font-bold flex items-center justify-center shadow">
@@ -372,7 +370,7 @@ export default function PointOfSale() {
                       {svc.key}
                     </p>
                   </div>
-                  
+
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span className="font-mono font-extrabold text-slate-900 text-base">
                       {formatNaira(svc.monthly_kobo)}
@@ -398,7 +396,7 @@ export default function PointOfSale() {
         {/* Right Side: Smart POS Register & Cart (5 cols) */}
         <div className="lg:col-span-5 flex flex-col space-y-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
-            
+
             {/* Register Top Banner */}
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -409,10 +407,10 @@ export default function PointOfSale() {
                 </div>
               </div>
               {cart.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={clearCart} 
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearCart}
                   className="text-slate-400 hover:text-red-400 hover:bg-white/10 text-xs h-8 px-2"
                 >
                   <Trash2 className="size-3.5 mr-1" /> Clear
@@ -442,7 +440,7 @@ export default function PointOfSale() {
 
                     <div className="flex items-center gap-2">
                       <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.service.key, -1)}
                           className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
                           aria-label="Decrease quantity"
@@ -452,7 +450,7 @@ export default function PointOfSale() {
                         <span className="px-2 font-mono text-xs font-bold text-slate-800">
                           {item.quantity}
                         </span>
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.service.key, 1)}
                           className="p-1 hover:bg-slate-200 text-slate-600 transition-colors"
                           aria-label="Increase quantity"
@@ -467,8 +465,8 @@ export default function PointOfSale() {
                         </p>
                       </div>
 
-                      <button 
-                        onClick={() => removeFromCart(item.service.key)} 
+                      <button
+                        onClick={() => removeFromCart(item.service.key)}
                         className="text-slate-400 hover:text-red-500 p-1"
                         aria-label="Remove item"
                       >
@@ -516,8 +514,8 @@ export default function PointOfSale() {
       </div>
 
       {/* APPLE PAY / OPAY STYLE NFC CARD TAP DIALOG */}
-      <Dialog 
-        open={isScanningModalOpen} 
+      <Dialog
+        open={isScanningModalOpen}
         onOpenChange={(open) => {
           if (!open) {
             setIsScanningModalOpen(false);
@@ -525,7 +523,7 @@ export default function PointOfSale() {
         }}
       >
         <DialogContent className="sm:max-w-md bg-white border border-slate-200 p-0 overflow-hidden rounded-3xl shadow-2xl">
-          
+
           {/* Header styling */}
           <div className="bg-[#0b2866] px-6 py-5 text-white text-center relative">
             <h3 className="text-sm font-semibold tracking-wider uppercase text-blue-200">Payment Terminal</h3>
@@ -538,7 +536,7 @@ export default function PointOfSale() {
           <div className="p-6">
             {status === "ready" && (
               <div className="flex flex-col items-center text-center space-y-4">
-                
+
                 {/* Modern Apple Pay / Contactless Pulsing Animation */}
                 <div className="relative my-2">
                   <div className="size-32 rounded-full bg-blue-50 border-8 border-blue-100 flex items-center justify-center shadow-inner animate-pulse">
@@ -567,7 +565,7 @@ export default function PointOfSale() {
                     autoComplete="off"
                     className="opacity-0 absolute -z-50"
                   />
-                  
+
                   {/* Visual input for manual Student ID or Email fallback if scanner disconnected */}
                   <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
                     <p className="text-xs text-slate-400 font-medium">Or enter Student ID / Email address manually:</p>
@@ -578,9 +576,9 @@ export default function PointOfSale() {
                         placeholder="e.g. CARD UID or L2E-1001"
                         className="font-mono text-sm border-slate-300"
                       />
-                      <Button 
-                        type="submit" 
-                        disabled={!cardInput.trim()} 
+                      <Button
+                        type="submit"
+                        disabled={!cardInput.trim()}
                         className="bg-[#0b2866] hover:bg-[#153f93] text-white"
                       >
                         Authorize
@@ -635,8 +633,8 @@ export default function PointOfSale() {
                   </div>
                 )}
 
-                <Button 
-                  onClick={resetAfterSuccess} 
+                <Button
+                  onClick={resetAfterSuccess}
                   className="w-full h-12 bg-slate-900 hover:bg-black text-white font-bold rounded-xl mt-4"
                 >
                   Done / Next Customer
@@ -655,19 +653,19 @@ export default function PointOfSale() {
                 </div>
 
                 <div className="w-full flex gap-3 pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsScanningModalOpen(false)} 
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsScanningModalOpen(false)}
                     className="flex-1 border-slate-300"
                   >
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => {
                       setStatus("ready");
                       setMessage("");
                       setCardInput("");
-                    }} 
+                    }}
                     className="flex-1 bg-[#0b2866] hover:bg-[#153f93] text-white"
                   >
                     Try Tap Again
