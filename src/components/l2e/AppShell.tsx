@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex-1"></div>
-          <div className="flex items-center gap-3"><SettingsDialog /></div>
+          {/* <div className="flex items-center gap-3"><SettingsDialog /></div> */}
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 p-6 md:p-8">{children}</main>
       </div>
