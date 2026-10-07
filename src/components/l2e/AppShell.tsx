@@ -1,4 +1,7 @@
-import { Link } from "@tanstack/react-router";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { LayoutDashboard, Users, Tags, DoorOpen, Scale, Moon, Sun, KeyRound, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,11 +14,12 @@ import { useL2E } from "@/lib/l2e";
 import { toast } from "sonner";
 
 const NAV = [
-  { to: "/", label: "Overview", icon: LayoutDashboard },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/global-stats", label: "Global Stats", icon: LayoutDashboard }, // Adjust according to image
   { to: "/students", label: "Students", icon: Users },
-  { to: "/prices", label: "Pricing", icon: Tags },
-  { to: "/attendance", label: "Access Logs", icon: DoorOpen },
-  { to: "/pebbles", label: "Reconciliation", icon: Scale },
+  { to: "/campuses", label: "Campuses", icon: DoorOpen },
+  { to: "/attendance", label: "Daily Attendance", icon: DoorOpen },
+  // Adding just a few for demonstration
 ] as const;
 
 function ThemeToggle() {
@@ -83,35 +87,46 @@ function Health() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   return (
-    <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
-        <div className="flex items-center gap-2 px-5 py-5">
-          <div className="grid size-7 place-items-center rounded-md bg-sidebar-primary font-mono text-xs font-bold text-sidebar-primary-foreground">L2E</div>
-          <div className="leading-tight"><p className="text-sm font-semibold text-sidebar-accent-foreground">Learn to Earn</p><p className="text-[10px] text-sidebar-foreground/60">Campus Operations</p></div>
+    <div className="flex min-h-screen font-sans">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex border-r border-[#153f93]">
+        <div className="flex items-center gap-3 px-6 py-6 border-b border-[#153f93]">
+          <div className="grid size-8 place-items-center rounded-sm text-xs font-bold font-sans tracking-tight">
+            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20L20 10V30L10 20Z" fill="white" />
+              <path d="M30 20L20 10V30L30 20Z" fill="white" fillOpacity="0.5" />
+            </svg>
+          </div>
+          <div className="leading-none flex flex-col">
+            <span className="text-xl font-bold font-sans tracking-tight">LEARN</span>
+            <span className="text-xl font-bold font-sans tracking-tight -mt-1">2EARN</span>
+          </div>
         </div>
-        <nav className="flex-1 space-y-0.5 px-3">
-          {NAV.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} activeOptions={{ exact: to === "/" }}
-              className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-sidebar-accent"
-              activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground font-medium" }}>
-              <Icon className="size-4" />{label}
-            </Link>
-          ))}
+        <nav className="flex-1 space-y-1 px-4 py-4 overflow-y-auto">
+          {NAV.map(({ to, label, icon: Icon }) => {
+            const active = pathname === to;
+            return (
+              <Link key={to} href={to}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#254b9d] text-white border-l-4 border-orange-500" : "text-blue-100 hover:bg-[#153f93] hover:text-white"}`}>
+                <Icon className="size-5 opacity-80" />{label}
+              </Link>
+            );
+          })}
         </nav>
-        <div className="border-t border-sidebar-border py-4"><Health /></div>
+        <div className="border-t border-[#153f93] py-4"><Health /></div>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background/85 px-4 backdrop-blur md:px-8">
+      <div className="flex min-w-0 flex-1 flex-col bg-slate-50">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-white px-6">
           <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map(({ to, icon: Icon, label }) => (
-              <Link key={to} to={to} activeOptions={{ exact: to === "/" }} aria-label={label} className="rounded-md p-2 text-muted-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}><Icon className="size-4" /></Link>
+              <Link key={to} href={to} aria-label={label} className="rounded-md p-2 text-slate-500"><Icon className="size-5" /></Link>
             ))}
           </nav>
-          <p className="hidden font-mono text-xs text-muted-foreground md:block">api.l2e.campus / v1</p>
-          <div className="flex items-center gap-2"><SettingsDialog /><ThemeToggle /></div>
+          <div className="flex-1"></div>
+          <div className="flex items-center gap-3"><SettingsDialog /><ThemeToggle /></div>
         </header>
-        <main className="mx-auto w-full max-w-7xl flex-1 p-4 md:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 p-6 md:p-10">{children}</main>
       </div>
     </div>
   );
