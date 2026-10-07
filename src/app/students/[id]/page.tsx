@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, CreditCard, Cpu, ShieldCheck, WifiOff, LogOut, Plus, Clock, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -72,7 +72,7 @@ export default function StudentDetail() {
   const params = useParams();
   const id = decodeURIComponent((params?.id as string) || "");
   const { students, subs, services, tap2accessDown, withdrawStudent, unsubscribe, getStudentDetails } = useL2E();
-  
+
   const [liveDetails, setLiveDetails] = useState<any>(null);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function StudentDetail() {
   } : null);
 
   if (!s) return <div className="p-10 text-center text-slate-500">Student not found. <Link href="/students" className="text-blue-600 hover:underline">Back to roster</Link></div>;
-  
+
   const mine = subs.filter((x) => x.student_id === id);
   const svc = (k: string) => services.find((x) => x.key === k);
   const entitlements = mine.filter((x) => grantsAccess(x));
@@ -103,7 +103,7 @@ export default function StudentDetail() {
       <Link href="/students" className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-blue-700 transition-colors">
         <ArrowLeft className="size-4" /> Back to Roster
       </Link>
-      
+
       <PageHeader title={s.full_name} sub={`${s.id} · registered ${s.registered_at}`}
         actions={s.status === "ACTIVE" ? (
           <AlertDialog>
@@ -158,7 +158,7 @@ export default function StudentDetail() {
               </table>
             </div>
           </Panel>
-          
+
           <Panel title="Local profile" className="border-slate-200 shadow-sm">
             <dl className="grid grid-cols-2 gap-x-4 gap-y-6 p-6 text-sm bg-white rounded-b-lg">
               <div><dt className="text-xs font-medium text-slate-500 mb-1">Card UID</dt><dd className="font-mono text-slate-900 bg-slate-100 inline-block px-2 py-1 rounded">{s.card_uid}</dd></div>
@@ -190,7 +190,7 @@ export default function StudentDetail() {
                   <span className={entitlements.length ? "text-orange-400" : "text-red-300"}>{entitlements.length ? "● ENABLED" : "● NO ACCESS"}</span>
                 </div>
               </div>
-              
+
               <div className="pt-2">
                 <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500"><ShieldCheck className="size-4 text-blue-500" />Active entitlements</p>
                 {entitlements.length ? entitlements.map((e) => (
@@ -200,7 +200,7 @@ export default function StudentDetail() {
                   </div>
                 )) : <p className="text-sm text-slate-500 italic">None</p>}
               </div>
-              
+
               <div className="pt-2">
                 <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500"><KeyRound className="size-4 text-blue-500" />Credentials</p>
                 <div className="flex justify-between items-center text-sm">
@@ -208,11 +208,11 @@ export default function StudentDetail() {
                   <Pill tone="success" className="bg-green-100 text-green-700 border-green-200">MIFARE · active</Pill>
                 </div>
               </div>
-              
+
               <div className="pt-2">
                 <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500"><Cpu className="size-4 text-blue-500" />Permitted devices</p>
                 <div className="flex flex-wrap gap-2">
-                  {["Main Gate A", ...entitlements.map((e) => ({ gym: "Gym Turnstile", library_247: "Library Door 2", makerspace: "Makerspace Reader", shuttle: "Shuttle Reader" } as Record<string, string>)[e.service_key])].map((d) => 
+                  {["Main Gate A", ...entitlements.map((e) => ({ gym: "Gym Turnstile", library_247: "Library Door 2", makerspace: "Makerspace Reader", shuttle: "Shuttle Reader" } as Record<string, string>)[e.service_key])].map((d) =>
                     <Pill key={d} tone="muted" className="bg-slate-100 text-slate-600 border-slate-200">{d}</Pill>
                   )}
                 </div>
@@ -220,7 +220,7 @@ export default function StudentDetail() {
             </div>
           )}
         </Panel>
-        
+
         <div className="lg:col-span-3">
           <Panel title="Recent usage (Gate Taps)" className="border-slate-200 shadow-sm" actions={<Link href={`/attendance?sid=${s.id}`} className="text-sm font-medium text-blue-600 hover:text-blue-800">View in access logs</Link>}>
             <div className="overflow-x-auto">

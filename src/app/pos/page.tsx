@@ -78,7 +78,7 @@ export default function PointOfSale() {
           </div>
         </div>
         <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-100" asChild>
-          <a href="/">Exit Kiosk</a>
+          <a href="/dashboard">Exit Kiosk</a>
         </Button>
       </header>
 

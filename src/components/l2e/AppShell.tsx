@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 space-y-1.5 px-3 py-2 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to || (to !== '/' && pathname.startsWith(to));
+            const active = pathname === to || pathname.startsWith(to + "/");
             return (
               <Link key={to} href={to}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${active ? "bg-[#183980] text-white shadow-inner" : "text-slate-300 hover:bg-[#183980] hover:text-white"}`}>
