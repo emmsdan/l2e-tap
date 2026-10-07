@@ -39,13 +39,14 @@ function SubscribeSheet({ studentId, existing }: { studentId: string; existing: 
                 </label>
               ))}
             </RadioGroup>
-            <Button disabled={!key} onClick={() => setQueued(subscribe(studentId, key))} className="mt-4 bg-[#0b2866] hover:bg-[#153f93]">Request payroll deduction</Button>
+            <Button disabled={!key} onClick={async () => {
+              const res = await subscribe(studentId, key);
+              setQueued(res);
+            }} className="mt-4 bg-[#0b2866] hover:bg-[#153f93]">Request payroll deduction</Button>
           </div>
         ) : (
           <div className="space-y-6 px-1 mt-4">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 font-mono text-xs text-slate-700">
-              <span className="text-slate-500">POST /students/{studentId}/subscriptions →</span> <b className="text-blue-700">202 Accepted</b>
-            </div>
+
             {live?.status === "ACTIVE" ? (
               <Alert className="border-green-200 bg-green-50 shadow-sm">
                 <ShieldCheck className="size-5 text-green-600" />
@@ -69,15 +70,33 @@ function SubscribeSheet({ studentId, existing }: { studentId: string; existing: 
 
 export default function StudentDetail() {
   const params = useParams();
-  const id = params.id as string;
-  const { students, subs, services, tap2accessDown, withdrawStudent, unsubscribe } = useL2E();
+  const id = decodeURIComponent((params?.id as string) || "");
+  const { students, subs, services, tap2accessDown, withdrawStudent, unsubscribe, getStudentDetails } = useL2E();
   
-  const s = students.find((x) => x.id === id);
+  const [liveDetails, setLiveDetails] = useState<any>(null);
+
+  useEffect(() => {
+    if (id) {
+      getStudentDetails(id).then((res) => {
+        if (res) setLiveDetails(res);
+      });
+    }
+  }, [id, getStudentDetails]);
+
+  const s = students.find((x) => x.id === id) || (liveDetails?.student ? {
+    id: liveDetails.student.student_id,
+    full_name: liveDetails.student.full_name,
+    card_uid: "CARD-" + liveDetails.student.student_id.slice(-6).toUpperCase(),
+    status: liveDetails.student.status,
+    registered_at: liveDetails.student.created_at?.slice(0, 10) || "2026-10-01",
+  } : null);
+
   if (!s) return <div className="p-10 text-center text-slate-500">Student not found. <Link href="/students" className="text-blue-600 hover:underline">Back to roster</Link></div>;
   
   const mine = subs.filter((x) => x.student_id === id);
   const svc = (k: string) => services.find((x) => x.key === k);
   const entitlements = mine.filter((x) => grantsAccess(x));
+  const t2aError = tap2accessDown ? "upstream timeout after 3000ms" : liveDetails?.tap2access_error;
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -96,17 +115,17 @@ export default function StudentDetail() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={() => { withdrawStudent(s.id); toast.success("Student withdrawn"); }}>Withdraw Student</AlertDialogAction>
+                <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={async () => { await withdrawStudent(s.id); toast.success("Student withdrawn"); }}>Withdraw Student</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         ) : <Pill tone="muted">WITHDRAWN</Pill>} />
 
-      {tap2accessDown && (
+      {t2aError && (
         <Alert className="mb-8 border-orange-200 bg-orange-50 shadow-sm">
           <WifiOff className="size-5 text-orange-600" />
           <AlertTitle className="text-orange-900 font-semibold">Tap2Access unreachable — showing local L2E data only</AlertTitle>
-          <AlertDescription className="font-mono text-xs text-orange-800 mt-2">tap2access_error: "upstream timeout after 3000ms (GET /cards/{s.card_uid})"</AlertDescription>
+          <AlertDescription className="font-mono text-xs text-orange-800 mt-2">tap2access_error: {JSON.stringify(t2aError)}</AlertDescription>
         </Alert>
       )}
 
@@ -130,7 +149,7 @@ export default function StudentDetail() {
                       <td className={td + " font-mono text-slate-600"}>{formatNaira(x.amount_kobo)}</td>
                       <td className={td}><SubBadge sub={x} /></td>
                       <td className={td + " text-right"}>
-                        {x.status === "ACTIVE" && <Button size="sm" variant="ghost" className="text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => unsubscribe(x.id)}>Unsubscribe</Button>}
+                        {x.status === "ACTIVE" && <Button size="sm" variant="ghost" className="text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => unsubscribe(s.id, x.service_key, x.id)}>Unsubscribe</Button>}
                       </td>
                     </tr>
                   ))}

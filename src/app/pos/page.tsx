@@ -33,7 +33,7 @@ export default function PointOfSale() {
     const uid = normaliseCardUid(cardInput);
     const student = students.find(s => s.card_uid === uid);
     
-    setTimeout(() => {
+    setTimeout(async () => {
       if (student) {
         if (student.status === "WITHDRAWN") {
           setStatus("error");
@@ -41,7 +41,7 @@ export default function PointOfSale() {
           setCardInput("");
         } else {
           setScannedStudent(student);
-          subscribe(student.id, selectedService.key);
+          await subscribe(student.id, selectedService.key);
           setStatus("success");
           setMessage(`Successfully charged ${student.full_name} for ${selectedService.name}.`);
           setCardInput("");
@@ -51,7 +51,7 @@ export default function PointOfSale() {
         setMessage(`Unknown card UID: ${uid}. No student found.`);
         setCardInput("");
       }
-    }, 800); // simulate brief processing delay
+    }, 400);
   };
 
   const reset = () => {
@@ -63,10 +63,29 @@ export default function PointOfSale() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      <PageHeader title="Tap2Pay Kiosk" sub="Select a service, then tap a student card to charge their account." />
-      
-      <div className="grid lg:grid-cols-2 gap-8">
+    <div className="min-h-screen bg-slate-50 flex flex-col animate-in fade-in duration-300">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="grid size-10 place-items-center bg-[#183980] rounded-lg text-xs font-bold tracking-tight">
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20L20 10V30L10 20Z" fill="white" />
+              <path d="M30 20L20 10V30L30 20Z" fill="white" />
+            </svg>
+          </div>
+          <div className="leading-none flex flex-col">
+            <span className="text-lg font-bold font-sans tracking-tight text-[#0b2866]">LEARN2EARN</span>
+            <span className="text-sm font-medium font-sans tracking-tight text-slate-500 mt-0.5">Tap2Pay Kiosk</span>
+          </div>
+        </div>
+        <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-100" asChild>
+          <a href="/">Exit Kiosk</a>
+        </Button>
+      </header>
+
+      <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto space-y-8">
+        <PageHeader title="Point of Sale" sub="Select a service, then tap a student card to charge their account." />
+        
+        <div className="grid lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-[#0b2866] flex items-center gap-2">
             <ShoppingCart className="size-5" /> 1. Select Item
@@ -165,6 +184,7 @@ export default function PointOfSale() {
           </Panel>
         </div>
       </div>
+      </main>
     </div>
   );
 }

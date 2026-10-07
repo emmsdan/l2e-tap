@@ -21,10 +21,10 @@ export function RegisterStudentDialog({ trigger }: { trigger: ReactNode }) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Register student</DialogTitle></DialogHeader>
-        <form className="space-y-4" onSubmit={(e) => {
+        <form className="space-y-4" onSubmit={async (e) => {
           e.preventDefault();
-          const r = registerStudent({ ...f, card_uid: uid });
-          if (!r.ok) { setErr(r.message); return; }
+          const r = await registerStudent({ ...f, card_uid: uid });
+          if (!r.ok) { setErr(r.message || "Failed to register student"); return; }
           toast.success(`${f.full_name} registered`);
           setF({ student_id: "", full_name: "", card_uid: "" }); setOpen(false);
         }}>

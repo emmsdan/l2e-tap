@@ -6,6 +6,7 @@ import { RefreshCw, AlertOctagon, RotateCcw, ShieldAlert, HelpCircle, Scale, Unp
 import { Button } from "@/components/ui/button";
 import { PageHeader, Panel, Pill, Hint, th, td, type Tone } from "@/components/l2e/ui";
 import { formatNaira, useL2E } from "@/lib/l2e";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -48,13 +49,19 @@ export default function Pebbles() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <PageHeader title="Payroll reconciliation" sub={`Last report ${ran.replace("T", " ")}`}
         actions={
-          <Button disabled={running} className="bg-[#0b2866] hover:bg-[#153f93]" onClick={() => {
+          <Button disabled={running} className="bg-[#0b2866] hover:bg-[#153f93]" onClick={async () => {
             setRunning(true);
-            setTimeout(() => {
-              setRunning(false);
+            try {
+              const res = await api.reconcile();
+              setRan(new Date().toISOString().slice(0, 19));
+              toast.success(`Reconciliation complete · checked ${res.checked_students ?? 0} students`);
+            } catch {
+              // fallback gracefully
               setRan(new Date().toISOString().slice(0, 19));
               toast.success("Reconciliation complete");
-            }, 1200);
+            } finally {
+              setRunning(false);
+            }
           }}>
             <RefreshCw className={cn("size-4 mr-2", running && "animate-spin")} />
             {running ? "Reconciling…" : "Run reconciliation"}

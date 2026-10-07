@@ -78,6 +78,11 @@ function Health() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // Using explicit NO DARKMODE strategy. Colors are forced into the light-mode/sidebar-blue style.
+
+  if (pathname.startsWith("/portal") || pathname.startsWith("/pos")) {
+    return <main className="font-sans min-h-screen bg-slate-50">{children}</main>;
+  }
+
   return (
     <div className="flex min-h-screen font-sans bg-[#f4f7fb]">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex shadow-xl shadow-blue-900/10 z-20">

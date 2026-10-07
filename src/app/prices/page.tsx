@@ -103,9 +103,9 @@ export default function Prices() {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={() => { 
+            <AlertDialogAction className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={async () => { 
               if (!confirm) return; 
-              const n = updatePrice(confirm.svc.key, confirm.kobo); 
+              const n = await updatePrice(confirm.svc.key, confirm.kobo); 
               toast.success(`Price updated · ${n} payroll updates queued`); 
               setEdit(null); 
               setConfirm(null); 
@@ -124,7 +124,7 @@ export default function Prices() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={() => { if (archive) archiveService(archive.key); setArchive(null); }}>Archive</AlertDialogAction>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700 text-white" onClick={async () => { if (archive) await archiveService(archive.key); setArchive(null); }}>Archive</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

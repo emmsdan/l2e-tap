@@ -8,15 +8,15 @@ import { RegisterStudentDialog } from "@/components/l2e/RegisterStudentDialog";
 import { useL2E } from "@/lib/l2e";
 
 export default function Overview() {
-  const { students, subs, taps, instructions } = useL2E();
+  const { students, subs, taps, instructions, stats } = useL2E();
   // Using fixed date as in original code
   const today = taps.filter((t) => t.at.startsWith("2026-10-07"));
 
   const metrics = [
-    { label: "Total students", value: students.length, icon: Users },
-    { label: "Active subscriptions", value: subs.filter((s) => s.status === "ACTIVE").length, icon: CheckCircle2 },
-    { label: "Attendance taps", value: taps.length, icon: Fingerprint },
-    { label: "Taps today", value: today.length, icon: CalendarClock },
+    { label: "Total students", value: stats?.students ?? students.length, icon: Users },
+    { label: "Active subscriptions", value: stats?.active_subscriptions ?? subs.filter((s) => s.status === "ACTIVE").length, icon: CheckCircle2 },
+    { label: "Attendance taps", value: stats?.attendance ?? taps.length, icon: Fingerprint },
+    { label: "Taps today", value: stats?.taps_today ?? today.length, icon: CalendarClock },
   ];
   const denials = taps.filter((t) => t.decision === "DENY").slice(0, 6);
   const failed = instructions.filter((i) => i.status === "FAILED").length;
