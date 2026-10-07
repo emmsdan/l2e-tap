@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LayoutDashboard, Users, Tags, DoorOpen, Scale, Moon, Sun, KeyRound, Wifi, WifiOff } from "lucide-react";
+import { LayoutDashboard, Users, Tags, DoorOpen, Scale, KeyRound, Wifi, WifiOff, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -15,23 +15,12 @@ import { toast } from "sonner";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/global-stats", label: "Global Stats", icon: LayoutDashboard }, // Adjust according to image
+  { to: "/pos", label: "Tap2Pay", icon: ShoppingCart },
   { to: "/students", label: "Students", icon: Users },
-  { to: "/campuses", label: "Campuses", icon: DoorOpen },
-  { to: "/attendance", label: "Daily Attendance", icon: DoorOpen },
-  // Adding just a few for demonstration
+  { to: "/prices", label: "Pricing", icon: Tags },
+  { to: "/attendance", label: "Access Logs", icon: DoorOpen },
+  { to: "/pebbles", label: "Reconciliation", icon: Scale },
 ] as const;
-
-function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-  useEffect(() => { setDark(localStorage.getItem("l2e-theme") === "dark"); }, []);
-  useEffect(() => { document.documentElement.classList.toggle("dark", dark); localStorage.setItem("l2e-theme", dark ? "dark" : "light"); }, [dark]);
-  return (
-    <Button variant="ghost" size="icon" onClick={() => setDark((d) => !d)} aria-label="Toggle theme">
-      {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-    </Button>
-  );
-}
 
 function SettingsDialog() {
   const { apiKey, authMode, setAuth, tap2accessDown, setTap2accessDown } = useL2E();
@@ -39,7 +28,7 @@ function SettingsDialog() {
   const [m, setM] = useState(authMode);
   return (
     <Dialog>
-      <DialogTrigger asChild><Button variant="outline" size="sm"><KeyRound className="size-4" />API</Button></DialogTrigger>
+      <DialogTrigger asChild><Button variant="outline" size="sm"><KeyRound className="size-4 mr-2" />API</Button></DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>API connection</DialogTitle>
@@ -72,13 +61,13 @@ function Health() {
   ];
   return (
     <div className="space-y-1.5 px-3 text-xs" data-tick={tick}>
-      <p className="px-1 text-[10px] uppercase tracking-wider text-sidebar-foreground/50">System</p>
+      <p className="px-1 text-[10px] uppercase tracking-wider text-white/50">System</p>
       {items.map((i) => (
         <div key={i.k} className="flex items-center justify-between rounded px-1 py-0.5">
           <span className="font-mono">{i.k}</span>
           <span className="flex items-center gap-1.5">
-            {i.ok ? <Wifi className="size-3 text-sidebar-primary" /> : <WifiOff className="size-3 text-destructive" />}
-            <span className={i.ok ? "text-sidebar-primary" : "text-destructive"}>{i.ok ? "ok" : "degraded"}</span>
+            {i.ok ? <Wifi className="size-3 text-white" /> : <WifiOff className="size-3 text-red-400" />}
+            <span className={i.ok ? "text-white" : "text-red-400"}>{i.ok ? "ok" : "degraded"}</span>
           </span>
         </div>
       ))}
@@ -88,45 +77,49 @@ function Health() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // Using explicit NO DARKMODE strategy. Colors are forced into the light-mode/sidebar-blue style.
   return (
-    <div className="flex min-h-screen font-sans">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex border-r border-[#153f93]">
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-[#153f93]">
-          <div className="grid size-8 place-items-center rounded-sm text-xs font-bold font-sans tracking-tight">
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="flex min-h-screen font-sans bg-[#f4f7fb]">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex shadow-xl shadow-blue-900/10 z-20">
+        <div className="flex items-center gap-3 px-6 py-8">
+          <div className="grid size-10 place-items-center bg-white/10 rounded-lg text-xs font-bold font-sans tracking-tight">
+            <svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20L20 10V30L10 20Z" fill="white" />
               <path d="M30 20L20 10V30L30 20Z" fill="white" fillOpacity="0.5" />
             </svg>
           </div>
           <div className="leading-none flex flex-col">
             <span className="text-xl font-bold font-sans tracking-tight">LEARN</span>
-            <span className="text-xl font-bold font-sans tracking-tight -mt-1">2EARN</span>
+            <span className="text-xl font-bold font-sans tracking-tight text-white/80 -mt-0.5">2EARN</span>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 px-4 py-4 overflow-y-auto">
+        
+        <nav className="flex-1 space-y-1.5 px-3 py-2 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to;
+            const active = pathname === to || (to !== '/' && pathname.startsWith(to));
             return (
               <Link key={to} href={to}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-[#254b9d] text-white border-l-4 border-orange-500" : "text-blue-100 hover:bg-[#153f93] hover:text-white"}`}>
-                <Icon className="size-5 opacity-80" />{label}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${active ? "bg-[#183980] text-white shadow-inner" : "text-white/70 hover:bg-[#183980]/50 hover:text-white"}`}>
+                {active && <div className="absolute left-0 w-1.5 h-8 bg-orange-500 rounded-r-full" />}
+                <Icon className={`size-5 ${active ? "text-orange-500" : "opacity-80"}`} />{label}
               </Link>
             );
           })}
         </nav>
-        <div className="border-t border-[#153f93] py-4"><Health /></div>
+        <div className="py-6 px-3 bg-black/10"><Health /></div>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col bg-slate-50">
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-white px-6">
+      
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-6 backdrop-blur">
           <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map(({ to, icon: Icon, label }) => (
               <Link key={to} href={to} aria-label={label} className="rounded-md p-2 text-slate-500"><Icon className="size-5" /></Link>
             ))}
           </nav>
           <div className="flex-1"></div>
-          <div className="flex items-center gap-3"><SettingsDialog /><ThemeToggle /></div>
+          <div className="flex items-center gap-3"><SettingsDialog /></div>
         </header>
-        <main className="mx-auto w-full max-w-7xl flex-1 p-6 md:p-10">{children}</main>
+        <main className="mx-auto w-full max-w-7xl flex-1 p-6 md:p-8">{children}</main>
       </div>
     </div>
   );
