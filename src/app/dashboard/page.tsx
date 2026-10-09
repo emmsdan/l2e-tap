@@ -16,9 +16,18 @@ import {
 } from "@/components/ui/dialog";
 import { money, services } from "@/lib/v2/support";
 import { useWorkspace, total } from "@/lib/v2/workspace";
+import { toast } from "sonner";
 
 export default function Dashboard() {
-  const { data, update, ready, subscribeStudentApi, unsubscribeStudentApi } = useWorkspace();
+  const {
+    data,
+    update,
+    ready,
+    selectStudent,
+    refreshWorkspace,
+    subscribeStudentApi,
+    unsubscribeStudentApi,
+  } = useWorkspace();
   const s = data.student;
   const [pending, setPending] = useState<string | null>(null);
 
@@ -50,6 +59,7 @@ export default function Dashboard() {
   const balance = s.monthlyStipend - spent;
   const item = data.catalog.find((c) => c.id === pending);
   const active = !!pending && s.subscriptions.includes(pending);
+  const adminMode = false
 
   return (
     <>
@@ -61,30 +71,42 @@ export default function Dashboard() {
               {s.campus} · {s.mode === "onsite" ? "Onsite" : "Online"}
             </span>
           </Link>
-          <div className="flex gap-2 items-center">
-            <span className="hidden sm:inline text-sm">
-              {s.firstName} {s.lastName}
-            </span>
-            <span className="avatar">
-              {s.firstName[0]}
-              {s.lastName[0]}
-            </span>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/admin">Admin</Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Reset prototype account"
-              onClick={() => update((w) => ({ ...w, student: null }))}
+          {adminMode && <div className="hidden md:flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Fellow:</span>
+            <select
+              aria-label="Switch Fellow"
+              value={s.id}
+              onChange={(e) => selectStudent(e.target.value)}
+              className="text-xs bg-muted/60 border rounded px-2 py-1 font-medium text-foreground cursor-pointer"
             >
-              <RotateCcw />
-            </Button>
-          </div>
+              {data.students.map((st) => (
+                <option key={st.id} value={st.id}>
+                  {st.firstName} {st.lastName} ({st.id})
+                </option>
+              ))}
+            </select>
+          </div>}
+          <span className="bg">
+            {s.firstName}
+            {" "}
+            {s.lastName}
+          </span>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin">Admin</Link>
+          </Button>
+          {/* <Button
+            variant="ghost"
+            size="icon"
+            title="Refresh live data from API"
+            aria-label="Refresh live data from API"
+            onClick={() => refreshWorkspace()}
+          >
+            <RotateCcw className="size-4" />
+          </Button> */}
         </div>
       </header>
 
-      <main className="site-width py-10">
+      <main className="site-width !py-[40px]">
         <h1 className="page-heading">Hey {s.firstName}</h1>
         <p className="text-muted-foreground">Month {s.monthsEnrolled} of your programme. Here's where your money is going.</p>
 
@@ -200,22 +222,32 @@ export default function Dashboard() {
 
         <section className="dashboard-bottom mt-10">
           <div className="dashboard-panel">
-            <p className="flex gap-2 text-sm text-muted-foreground">
-              <CreditCard className="size-4" />
-              Your NFC student card
-            </p>
+            <div className="flex justify-between items-center">
+              <p className="flex gap-2 text-sm text-muted-foreground items-center">
+                <CreditCard className="size-4" />
+                Your NFC student card
+              </p>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Live Tap2Access
+              </span>
+            </div>
             <div className="nfc-card mt-4">
               <div className="flex justify-between text-sm">
                 <span>Learn2Earn</span>
                 <Nfc className="size-5" />
               </div>
               <p className="display text-xl font-bold mt-8">{s.cardId}</p>
-              <p className="text-sm opacity-70 mt-1">
-                {s.firstName} {s.lastName}
-              </p>
+              <div className="flex justify-between items-end mt-1">
+                <p className="text-sm opacity-80">
+                  {s.firstName} {s.lastName}
+                </p>
+                <span className="text-xs opacity-60 font-mono">{s.id}</span>
+              </div>
             </div>
             <dl className="mt-5 space-y-3 text-sm">
               {[
+                ["Student ID", s.id],
+                ["Card UID", s.cardId],
                 ["Campus", s.campus],
                 ["Mode", s.mode === "onsite" ? "Onsite" : "Online"],
                 ["State", s.state],
@@ -223,26 +255,34 @@ export default function Dashboard() {
               ].map(([k, v]) => (
                 <div className="summary-line gap-4" key={k}>
                   <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="text-right break-all">{v}</dd>
+                  <dd className="text-right font-medium break-all">{v}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
           <div className="dashboard-panel">
-            <h2 className="text-lg font-bold">Recent activity</h2>
-            <div className="mt-5 divide-y">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">Recent activity</h2>
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                Live Attendance Logs
+              </span>
+            </div>
+            <div className="mt-5 divide-y max-h-96 overflow-y-auto pr-1">
               {s.activity.map((a, i) => (
                 <div key={i} className="py-4">
                   <strong className="text-sm">{a.label}</strong>
                   <p className="text-sm text-muted-foreground mt-1">{a.detail}</p>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(a.at).toLocaleDateString("en-GB")}
+                    {new Date(a.at).toLocaleString("en-GB", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                   </span>
                 </div>
               ))}
               {!s.activity.length && (
-                <p className="text-sm text-muted-foreground py-4">No recent activity logged yet.</p>
+                <p className="text-sm text-muted-foreground py-4">No attendance or tap activity recorded yet.</p>
               )}
             </div>
           </div>
@@ -272,10 +312,16 @@ export default function Dashboard() {
               onClick={async () => {
                 if (!item) return;
                 const itemId = item.id;
-                if (active) {
-                  await unsubscribeStudentApi(s.id, itemId);
-                } else {
-                  await subscribeStudentApi(s.id, itemId);
+                try {
+                  if (active) {
+                    await unsubscribeStudentApi(s.id, itemId);
+                    toast.success(`Unsubscribed from ${item.name}`);
+                  } else {
+                    await subscribeStudentApi(s.id, itemId);
+                    toast.success(`Subscribed to ${item.name}`);
+                  }
+                } catch (e) {
+                  toast.error(`Action failed: ${e instanceof Error ? e.message : "Unknown error"}`);
                 }
                 setPending(null);
               }}

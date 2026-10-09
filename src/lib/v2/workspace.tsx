@@ -175,6 +175,9 @@ const STORAGE_KEY = "l2e_v2_workspace_state";
 export interface WorkspaceContextType {
   data: Workspace;
   ready: boolean;
+  activeStudentId: string | null;
+  selectStudent: (studentId: string) => Promise<void>;
+  refreshWorkspace: () => Promise<void>;
   update: (fn: (w: Workspace) => Workspace) => void;
   // Specific V1 API backed mutations
   registerStudentApi: (student: {
@@ -198,7 +201,98 @@ const Context = createContext<WorkspaceContextType | null>(null);
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<Workspace>(initialWorkspace);
   const [ready, setReady] = useState(false);
-  const changed = useRef(false);
+  const changed = useRef(false);  // Active student id stored in local storage
+  const [activeStudentId, setActiveStudentIdState] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("l2e_active_student_id") || null;
+    }
+    return null;
+  });
+
+  const setActiveStudentId = (id: string | null) => {
+    setActiveStudentIdState(id);
+    if (typeof window !== "undefined") {
+      if (id) {
+        localStorage.setItem("l2e_active_student_id", id);
+      } else {
+        localStorage.removeItem("l2e_active_student_id");
+      }
+    }
+  };
+
+  // Helper to fetch live student details, subscriptions, and attendance
+  const fetchLiveStudentData = async (
+    targetStudentId: string,
+    existingStudent?: Student | null
+  ): Promise<Student | null> => {
+    try {
+      const [detailRes, subRes, attRes] = await Promise.allSettled([
+        api.getStudent(targetStudentId),
+        api.listSubscriptions(targetStudentId),
+        api.listAttendance({ student_id: targetStudentId, limit: 15 }),
+      ]);
+
+      const detail = detailRes.status === "fulfilled" ? detailRes.value : null;
+      const apiSubs = subRes.status === "fulfilled" ? subRes.value.subscriptions || [] : [];
+      const apiAtt = attRes.status === "fulfilled" ? attRes.value.attendance || [] : [];
+
+      const rawStudent = detail?.student;
+      const fullName = rawStudent?.full_name || existingStudent?.firstName
+        ? `${existingStudent?.firstName || ""} ${existingStudent?.lastName || ""}`.trim()
+        : "Fellow";
+      const nameParts = fullName.split(" ");
+      const firstName = existingStudent?.firstName || nameParts[0] || "Fellow";
+      const lastName = existingStudent?.lastName || nameParts.slice(1).join(" ") || "Student";
+
+      // Extract card uid from tap2access credentials or fallback
+      const credentials = detail?.tap2access?.credentials;
+      let cardUid = existingStudent?.cardId;
+      if (credentials && credentials.length > 0) {
+        const cred = credentials[0] as Record<string, unknown>;
+        cardUid = (cred.card_uid as string) || (cred.credential_id as string) || cardUid;
+      }
+      if (!cardUid) {
+        cardUid = `L2E-${targetStudentId.replace(/^stu-|^L2E-/, "")}`;
+      }
+
+      // Active subscriptions from live API
+      const liveSubs = apiSubs
+        .filter((sub) => (sub.status ?? sub.state) === "ACTIVE")
+        .map((sub) => sub.service_key);
+
+      // Map attendance to activity log
+      const liveActivity = apiAtt.map((att) => ({
+        label: att.decision === "ALLOW" ? `Granted: ${att.service_name || "Access"}` : `Denied: ${att.service_name || "Access"}`,
+        detail: att.reason || (att.device_id ? `Tapped at ${att.device_id}` : "Tap event"),
+        at: att.occurred_at || new Date().toISOString(),
+      }));
+
+      const state = existingStudent?.state || "Lagos";
+      const mode = existingStudent?.mode || "onsite";
+
+      return {
+        id: targetStudentId,
+        firstName,
+        lastName,
+        email: existingStudent?.email || `${firstName.toLowerCase()}.${lastName.toLowerCase()}@learn2earn.ng`.replace(/\s+/g, ""),
+        phone: existingStudent?.phone,
+        state,
+        campus: mode === "online" ? "Remote" : campusFor(state),
+        mode,
+        cardId: cardUid,
+        monthsEnrolled: existingStudent?.monthsEnrolled || 1,
+        monthlyStipend: existingStudent?.monthlyStipend || STIPEND,
+        subscriptions: liveSubs.length > 0 ? liveSubs : (existingStudent?.subscriptions || []),
+        assignments: existingStudent?.assignments || {},
+        rooms: existingStudent?.rooms,
+        createdAt: rawStudent?.created_at || existingStudent?.createdAt || new Date().toISOString(),
+        activity: liveActivity.length > 0 ? liveActivity : (existingStudent?.activity || []),
+      };
+    } catch (err) {
+      console.warn("Could not load live student info:", err);
+      return existingStudent || null;
+    }
+  };
 
   // 1. Initial Load: Load local cache first, then sync with live v1 API endpoints
   useEffect(() => {
@@ -220,91 +314,109 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           api.listPrices(),
         ]);
 
-        setData((prev) => {
-          let updatedCatalog = [...prev.catalog];
-          let updatedStudents = [...prev.students];
+        let updatedCatalog = initialWorkspace().catalog;
+        let updatedStudents: Student[] = [];
 
-          // Sync prices from v1 API into catalog
-          if (pricesRes.status === "fulfilled" && pricesRes.value.prices?.length) {
-            const apiPrices = pricesRes.value.prices;
-            updatedCatalog = updatedCatalog.map((catItem) => {
-              const matched = apiPrices.find(
-                (p) => p.service_key === catItem.id || p.service_name.toLowerCase() === catItem.name.toLowerCase()
-              );
-              if (matched) {
-                return {
-                  ...catItem,
-                  name: matched.service_name || catItem.name,
-                  price: Math.round(matched.amount_kobo / 100),
-                  archived: matched.status === "ARCHIVED",
-                };
-              }
-              return catItem;
-            });
-
-            // Add any extra services that exist on server
-            apiPrices.forEach((p) => {
-              const exists = updatedCatalog.some(
-                (c) => c.id === p.service_key || c.name.toLowerCase() === p.service_name.toLowerCase()
-              );
-              if (!exists) {
-                updatedCatalog.push({
-                  id: p.service_key,
-                  name: p.service_name,
-                  description: `Subscribed service: ${p.service_name}`,
-                  price: Math.round(p.amount_kobo / 100),
-                  modes: ["onsite", "online"],
-                  tapAccess: false,
-                  archived: p.status === "ARCHIVED",
-                  icon: "wallet",
-                });
-              }
-            });
-          }
-
-          // Sync students from v1 API into students list
-          if (studentsRes.status === "fulfilled" && studentsRes.value.students?.length) {
-            const apiStudents = studentsRes.value.students;
-            const mappedApiStudents: Student[] = apiStudents.map((s, idx) => {
-              const nameParts = (s.full_name || "Student").split(" ");
-              const firstName = nameParts[0] || "Student";
-              const lastName = nameParts.slice(1).join(" ") || `Fellow-${idx + 1}`;
-              const state = states[idx % states.length] ?? "Lagos";
-              const mode = idx % 3 === 0 ? "online" : "onsite";
-
-              // Check if we already have local subscriptions / assignments for this student
-              const existing = prev.students.find((e) => e.id === s.student_id);
-
+        // Sync prices from v1 API into catalog
+        if (pricesRes.status === "fulfilled" && pricesRes.value.prices?.length) {
+          const apiPrices = pricesRes.value.prices;
+          updatedCatalog = updatedCatalog.map((catItem) => {
+            const matched = apiPrices.find(
+              (p) => p.service_key === catItem.id || p.service_name.toLowerCase() === catItem.name.toLowerCase()
+            );
+            if (matched) {
               return {
-                id: s.student_id,
-                firstName,
-                lastName,
-                email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@learn2earn.ng`.replace(/\s+/g, ""),
-                state,
-                campus: mode === "online" ? "Remote" : campusFor(state),
-                mode,
-                cardId: `L2E-2026-${(1000 + idx).toString().slice(-4)}`,
-                monthsEnrolled: existing?.monthsEnrolled ?? 1 + ((idx * 3) % 10),
-                monthlyStipend: STIPEND,
-                subscriptions: existing?.subscriptions ?? ["hub", "meals"],
-                assignments: existing?.assignments ?? {},
-                createdAt: s.created_at || new Date().toISOString(),
-                activity: existing?.activity ?? [],
+                ...catItem,
+                name: matched.service_name || catItem.name,
+                price: Math.round(matched.amount_kobo / 100),
+                archived: matched.status === "ARCHIVED",
               };
-            });
+            }
+            return catItem;
+          });
 
-            // Merge server students while keeping local state intact
-            const serverIds = new Set(mappedApiStudents.map((s) => s.id));
-            const localOnly = prev.students.filter((s) => !serverIds.has(s.id));
-            updatedStudents = [...mappedApiStudents, ...localOnly];
+          // Add any extra services that exist on server
+          apiPrices.forEach((p) => {
+            const exists = updatedCatalog.some(
+              (c) => c.id === p.service_key || c.name.toLowerCase() === p.service_name.toLowerCase()
+            );
+            if (!exists) {
+              updatedCatalog.push({
+                id: p.service_key,
+                name: p.service_name,
+                description: `Subscribed service: ${p.service_name}`,
+                price: Math.round(p.amount_kobo / 100),
+                modes: ["onsite", "online"],
+                tapAccess: false,
+                archived: p.status === "ARCHIVED",
+                icon: "wallet",
+              });
+            }
+          });
+        }
+
+        // Sync students from v1 API into students list
+        if (studentsRes.status === "fulfilled" && studentsRes.value.students?.length) {
+          const apiStudents = studentsRes.value.students;
+          const mappedApiStudents: Student[] = apiStudents.map((s, idx) => {
+            const nameParts = (s.full_name || "Student").split(" ");
+            const firstName = nameParts[0] || "Student";
+            const lastName = nameParts.slice(1).join(" ") || `Fellow-${idx + 1}`;
+            const state = states[idx % states.length] ?? "Lagos";
+            const mode = idx % 3 === 0 ? "online" : "onsite";
+
+            const existing = localData?.students.find((e) => e.id === s.student_id);
+
+            return {
+              id: s.student_id,
+              firstName,
+              lastName,
+              email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@learn2earn.ng`.replace(/\s+/g, ""),
+              state,
+              campus: mode === "online" ? "Remote" : campusFor(state),
+              mode,
+              cardId: `L2E-${s.student_id.replace(/^stu-|^L2E-/, "")}`,
+              monthsEnrolled: existing?.monthsEnrolled ?? 1 + ((idx * 3) % 10),
+              monthlyStipend: STIPEND,
+              subscriptions: existing?.subscriptions ?? ["hub", "meals"],
+              assignments: existing?.assignments ?? {},
+              createdAt: s.created_at || new Date().toISOString(),
+              activity: existing?.activity ?? [],
+            };
+          });
+
+          const serverIds = new Set(mappedApiStudents.map((s) => s.id));
+          const localOnly = (localData?.students || []).filter((s) => !serverIds.has(s.id));
+          updatedStudents = [...mappedApiStudents, ...localOnly];
+        } else if (localData?.students?.length) {
+          updatedStudents = localData.students;
+        }
+
+        // Determine which student to select for the dashboard
+        const storedStudentId = localStorage.getItem("l2e_active_student_id");
+        let targetId = storedStudentId || localData?.student?.id;
+
+        if (!targetId && updatedStudents.length > 0) {
+          targetId = updatedStudents[0]?.id;
+        }
+
+        let liveActiveStudent: Student | null = localData?.student || null;
+
+        if (targetId) {
+          const baseStudent = updatedStudents.find((s) => s.id === targetId) || localData?.student;
+          liveActiveStudent = await fetchLiveStudentData(targetId, baseStudent);
+          if (liveActiveStudent) {
+            setActiveStudentIdState(targetId);
+            localStorage.setItem("l2e_active_student_id", targetId);
           }
+        }
 
-          return {
-            ...prev,
-            catalog: updatedCatalog,
-            students: updatedStudents,
-          };
-        });
+        setData((prev) => ({
+          ...prev,
+          catalog: updatedCatalog,
+          students: updatedStudents.length > 0 ? updatedStudents : prev.students,
+          student: liveActiveStudent || prev.student,
+        }));
 
         setReady(true);
       } catch (err) {
@@ -380,6 +492,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     };
 
     changed.current = true;
+    setActiveStudentId(studentId);
     setData((prev) => ({
       ...prev,
       student: newStudent,
@@ -499,11 +612,72 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Select and switch student in dashboard
+  const selectStudent = async (studentId: string) => {
+    setActiveStudentId(studentId);
+    const existing = data.students.find((s) => s.id === studentId);
+    const live = await fetchLiveStudentData(studentId, existing);
+    if (live) {
+      changed.current = true;
+      setData((prev) => ({
+        ...prev,
+        student: live,
+      }));
+    }
+  };
+
+  // Refresh entire workspace from live V1 APIs
+  const refreshWorkspace = async () => {
+    try {
+      const [studentsRes, pricesRes] = await Promise.allSettled([
+        api.listStudents({ limit: 100 }),
+        api.listPrices(),
+      ]);
+
+      let updatedCatalog = [...data.catalog];
+      if (pricesRes.status === "fulfilled" && pricesRes.value.prices?.length) {
+        const apiPrices = pricesRes.value.prices;
+        updatedCatalog = updatedCatalog.map((catItem) => {
+          const matched = apiPrices.find(
+            (p) => p.service_key === catItem.id || p.service_name.toLowerCase() === catItem.name.toLowerCase()
+          );
+          if (matched) {
+            return {
+              ...catItem,
+              name: matched.service_name || catItem.name,
+              price: Math.round(matched.amount_kobo / 100),
+              archived: matched.status === "ARCHIVED",
+            };
+          }
+          return catItem;
+        });
+      }
+
+      let targetId = activeStudentId || data.student?.id;
+      let liveStu: Student | null = data.student;
+      if (targetId) {
+        liveStu = await fetchLiveStudentData(targetId, data.student);
+      }
+
+      changed.current = true;
+      setData((prev) => ({
+        ...prev,
+        catalog: updatedCatalog,
+        student: liveStu || prev.student,
+      }));
+    } catch (e) {
+      console.warn("Refresh workspace note:", e);
+    }
+  };
+
   return (
     <Context.Provider
       value={{
         data,
         ready,
+        activeStudentId,
+        selectStudent,
+        refreshWorkspace,
         update: (fn) => {
           changed.current = true;
           setData(fn);

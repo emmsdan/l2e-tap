@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { PageHeader, Panel, Pill, Hint, th, td } from "@/components/l2e/ui";
 import { formatNaira, nairaToKobo, koboToNaira, useL2E, type Service } from "@/lib/l2e";
 import { toast } from "sonner";
+import { DEFAULT_SERVICES_LIST } from "@/lib/v2/support";
 
 export default function Prices() {
   const { services, updatePrice, createService, archiveService } = useL2E();
@@ -55,93 +56,129 @@ export default function Prices() {
     }
   };
 
+  const handleCreateDefault = async () => {
+    if (!window.confirm("This will create all 8 default services with the prices below (if they don't already exist). Are you sure?")) {
+      return;
+    }
+
+    const defaults = DEFAULT_SERVICES_LIST
+
+    let created = 0;
+    for (const svc of defaults) {
+      // Check if service already exists by key
+      try {
+        const existing = services.find(s => s.key === svc.id);
+        if (!existing) {
+          const res = await createService({
+            name: svc.name,
+            key: svc.id,
+            amount_kobo: svc.price * 100,
+          } as any);
+          if (res.ok) {
+            created++;
+          }
+        }
+      } catch (e) {
+        console.error(e)
+        toast.error("Failed to create service")
+      }
+    }
+
+    toast.success(`${created} new services created`);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <PageHeader 
-        title="Service price catalogue" 
-        sub="Prices stored as integer kobo; shown in Naira." 
+      <PageHeader
+        title="Service price catalogue"
+        sub="Prices stored as integer kobo; shown in Naira."
         actions={
-          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#0b2866] hover:bg-[#153f93] text-white">
-                <Plus className="size-4 mr-1.5" /> New Service / Price
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-white sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-[#0b2866]">Create New Service</DialogTitle>
-                <DialogDescription>
-                  Add a new service catalogue item and set its monthly price in Naira.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreate} className="space-y-4 py-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="service-name">Service Name</Label>
-                  <Input 
-                    id="service-name"
-                    placeholder="e.g. Campus Cafeteria Meal Plan" 
-                    value={newName} 
-                    onChange={(e) => {
-                      setNewName(e.target.value);
-                      if (!newKey || newKey === newName.toLowerCase().replace(/[^a-z0-9]+/g, "_")) {
-                        setNewKey(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "_"));
-                      }
-                    }}
-                    required
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="service-key">Service Key (Identifier)</Label>
-                  <Input 
-                    id="service-key"
-                    placeholder="e.g. cafeteria_meal_plan" 
-                    value={newKey} 
-                    onChange={(e) => setNewKey(e.target.value)}
-                    className="font-mono text-sm"
-                  />
-                  <p className="text-[11px] text-slate-500">Unique identifier used for NFC gates and subscriptions</p>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="service-price">Monthly Price (₦ Naira)</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-slate-500 font-medium">₦</span>
-                    <Input 
-                      id="service-price"
-                      type="number" 
-                      min="1" 
-                      step="0.01" 
-                      placeholder="5000" 
-                      className="pl-8 font-mono" 
-                      value={newPriceNaira} 
-                      onChange={(e) => setNewPriceNaira(e.target.value)}
+          <div className="flex flex-wrap gap-2">
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#0b2866] hover:bg-[#153f93] text-white">
+                  <Plus className="size-4 mr-1.5" /> New Service / Price
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-white sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-[#0b2866]">Create New Service</DialogTitle>
+                  <DialogDescription>
+                    Add a new service catalogue item and set its monthly price in Naira.
+                  </DialogDescription>
+                </DialogHeader>
+                <Button className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={handleCreateDefault}>
+                  <Plus className="size-4 mr-1.5" /> Create Default Prices List
+                </Button>
+                <form onSubmit={handleCreate} className="space-y-4 py-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="service-name">Service Name</Label>
+                    <Input
+                      id="service-name"
+                      placeholder="e.g. Campus Cafeteria Meal Plan"
+                      value={newName}
+                      onChange={(e) => {
+                        setNewName(e.target.value);
+                        if (!newKey || newKey === newName.toLowerCase().replace(/[^a-z0-9]+/g, "_")) {
+                          setNewKey(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "_"));
+                        }
+                      }}
                       required
                     />
                   </div>
-                  {newPriceNaira && Number(newPriceNaira) > 0 && (
-                    <p className="text-[11px] font-mono text-slate-500">
-                      = {nairaToKobo(Number(newPriceNaira)).toLocaleString()} kobo
-                    </p>
-                  )}
-                </div>
-                <DialogFooter className="pt-2">
-                  <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={creating} className="bg-[#0b2866] hover:bg-[#153f93] text-white">
-                    {creating ? "Creating..." : "Create Service"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="service-key">Service Key (Identifier)</Label>
+                    <Input
+                      id="service-key"
+                      placeholder="e.g. cafeteria_meal_plan"
+                      value={newKey}
+                      onChange={(e) => setNewKey(e.target.value)}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-[11px] text-slate-500">Unique identifier used for NFC gates and subscriptions</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="service-price">Monthly Price (₦ Naira)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-slate-500 font-medium">₦</span>
+                      <Input
+                        id="service-price"
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        placeholder="5000"
+                        className="pl-8 font-mono"
+                        value={newPriceNaira}
+                        onChange={(e) => setNewPriceNaira(e.target.value)}
+                        required
+                      />
+                    </div>
+                    {newPriceNaira && Number(newPriceNaira) > 0 && (
+                      <p className="text-[11px] font-mono text-slate-500">
+                        = {nairaToKobo(Number(newPriceNaira)).toLocaleString()} kobo
+                      </p>
+                    )}
+                  </div>
+                  <DialogFooter className="pt-2">
+                    <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                    <Button type="submit" disabled={creating} className="bg-[#0b2866] hover:bg-[#153f93] text-white">
+                      {creating ? "Creating..." : "Create Service"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         }
       />
-      
+
       <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm shadow-sm">
         <RefreshCcw className="mt-0.5 size-4 shrink-0 text-blue-600" />
         <p className="text-blue-900">
           <b className="font-semibold text-[#0b2866]">Auto-repricing:</b> changing a price queues an <span className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-blue-100">UPDATE</span> payroll instruction to Pebbles for every active subscriber of that service. New amounts apply from the next deduction cycle.
         </p>
       </div>
-      
+
       <Panel className="border-slate-200 shadow-sm overflow-hidden bg-white">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -162,11 +199,11 @@ export default function Prices() {
                   </td>
                   <td className={td}>
                     {edit?.key === s.key ? (
-                      <form className="flex items-center gap-2" onSubmit={(e) => { 
-                        e.preventDefault(); 
-                        const k = nairaToKobo(Number(edit.naira)); 
-                        if (k > 0 && k !== s.monthly_kobo) setConfirm({ svc: s, kobo: k }); 
-                        else setEdit(null); 
+                      <form className="flex items-center gap-2" onSubmit={(e) => {
+                        e.preventDefault();
+                        const k = nairaToKobo(Number(edit.naira));
+                        if (k > 0 && k !== s.monthly_kobo) setConfirm({ svc: s, kobo: k });
+                        else setEdit(null);
                       }}>
                         <span className="text-slate-400 font-medium">₦</span>
                         <Input autoFocus type="number" min={1} step="0.01" value={edit.naira} onChange={(e) => setEdit({ ...edit, naira: e.target.value })} className="h-8 w-32 font-mono border-slate-300" />
@@ -219,12 +256,12 @@ export default function Prices() {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={async () => { 
-              if (!confirm) return; 
-              const n = await updatePrice(confirm.svc.key, confirm.kobo); 
-              toast.success(`Price updated · ${n} payroll updates queued`); 
-              setEdit(null); 
-              setConfirm(null); 
+            <AlertDialogAction className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={async () => {
+              if (!confirm) return;
+              const n = await updatePrice(confirm.svc.key, confirm.kobo);
+              toast.success(`Price updated · ${n} payroll updates queued`);
+              setEdit(null);
+              setConfirm(null);
             }}>Update & queue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
