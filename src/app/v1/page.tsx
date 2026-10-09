@@ -47,6 +47,12 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             <Link
+              href="/"
+              className="inline-flex text-xs font-semibold px-2.5 py-1 rounded bg-orange-100 text-orange-800 hover:bg-orange-200 transition-colors"
+            >
+              ← Back to v2
+            </Link>
+            <Link
               href="/portal"
               className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[#0b2866] transition-colors"
             >

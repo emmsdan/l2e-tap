@@ -1,6 +1,0 @@
-import {createFileRoute,Link,Outlet} from '@tanstack/react-router';
-import {BarChart3,Users,LayoutGrid,Building2,Nfc} from 'lucide-react';
-import {Button} from '@/components/ui/button';
-import logo from '@/assets/learn2earnlogo.svg.asset.json';
-export const Route=createFileRoute('/admin')({component:Admin});
-function Admin(){return <div className="admin-shell"><header className="border-b bg-background"><div className="admin-width flex justify-between items-center py-3"><Link to="/" className="flex gap-3 items-center"><img src={logo.url} alt="Learn2Earn" className="brand-logo"/><span className="admin-badge">Admin</span></Link><Button variant="outline" size="sm" asChild><Link to="/dashboard">Student view</Link></Button></div><nav className="admin-width overflow-x-auto flex gap-1">{([{to:'/admin',label:'Overview',icon:BarChart3},{to:'/admin/students',label:'Students',icon:Users},{to:'/admin/services',label:'Services',icon:LayoutGrid},{to:'/admin/facilities',label:'Facilities',icon:Building2},{to:'/admin/readers',label:'Card readers',icon:Nfc}] as const).map(n=><Link key={n.to} to={n.to} activeOptions={{exact:true}} className="admin-tab" activeProps={{className:'admin-tab active'}}><n.icon className="size-4"/>{n.label}</Link>)}</nav></header><main className="admin-width py-10"><Outlet/></main></div>}
