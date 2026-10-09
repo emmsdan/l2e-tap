@@ -1,10 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Sparkles, CreditCard, ToggleLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader, SiteFooter } from "@/components/v2/site-header";
-import { services, money } from "@/lib/v2/support";
+import { money, getServiceIcon } from "@/lib/v2/support";
+import { useWorkspace } from "@/lib/v2/workspace";
 
 export default function Home() {
+  const { data } = useWorkspace();
+  const liveServices = data.catalog.filter((c) => !c.archived);
+
   return (
     <>
       <SiteHeader />
@@ -37,7 +43,7 @@ export default function Home() {
           <div className="site-width stat-grid">
             {[
               ["₦150,000", "Monthly stipend"],
-              ["8", "Support services"],
+              [liveServices.length ? String(liveServices.length) : "Live", "Support services"],
               ["Any month", "Cancel or resume"],
               ["1 card", "Tap for hub, bus, meals"],
             ].map(([a, b]) => (
@@ -56,19 +62,27 @@ export default function Home() {
               Every service you take is billed monthly against your stipend. Take less, keep more.
             </p>
             <div className="service-grid">
-              {services.map((s) => (
-                <article className="service-card" key={s.id}>
-                  <div className="service-icon">
-                    <s.icon />
-                  </div>
-                  <h3>{s.name}</h3>
-                  <p>{s.description}</p>
-                  <div className="service-price">
-                    {money(s.price)}
-                    <small>/mo</small>
-                  </div>
-                </article>
-              ))}
+              {liveServices.map((s) => {
+                const Icon = getServiceIcon(s.id || s.name);
+                return (
+                  <article className="service-card" key={s.id}>
+                    <div className="service-icon">
+                      <Icon />
+                    </div>
+                    <h3>{s.name}</h3>
+                    <p>{s.description}</p>
+                    <div className="service-price">
+                      {money(s.price)}
+                      <small>/mo</small>
+                    </div>
+                  </article>
+                );
+              })}
+              {!liveServices.length && (
+                <div className="col-span-full py-8 text-center text-muted-foreground">
+                  Loading live service menu…
+                </div>
+              )}
             </div>
           </div>
         </section>

@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { money, services } from "@/lib/v2/support";
+import { money, getServiceIcon } from "@/lib/v2/support";
 import { useWorkspace, total } from "@/lib/v2/workspace";
 import { toast } from "sonner";
 
@@ -24,12 +24,31 @@ export default function Dashboard() {
     update,
     ready,
     selectStudent,
+    loginStudent,
+    logoutStudent,
     refreshWorkspace,
     subscribeStudentApi,
     unsubscribeStudentApi,
   } = useWorkspace();
-  const s = data.student;
-  const [pending, setPending] = useState<string | null>(null);
+  const [inputStudentId, setInputStudentId] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputStudentId.trim()) return;
+    setLoggingIn(true);
+    try {
+      await loginStudent(inputStudentId.trim());
+      toast.success(`Welcome! Student account loaded.`);
+      setShowSwitchModal(false);
+      setInputStudentId("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load student record");
+    } finally {
+      setLoggingIn(false);
+    }
+  };
 
   if (!ready) {
     return <div className="site-width py-16 text-muted-foreground">Loading your dashboard…</div>;
@@ -38,16 +57,49 @@ export default function Dashboard() {
   if (!s) {
     return (
       <div className="min-h-screen grid place-items-center">
-        <div className="text-center p-6">
-          <Image src="/logo.svg" alt="Learn2Earn" width={104} height={40} className="brand-logo mx-auto mb-8" />
-          <h1 className="page-heading">Your dashboard is waiting.</h1>
-          <p className="text-muted-foreground mb-6">Create your student account to get started.</p>
-          <div className="flex justify-center gap-3">
-            <Button asChild>
-              <Link href="/register">Get started</Link>
+        <div className="w-full max-w-md mx-auto p-6 bg-card border rounded-2xl shadow-sm text-center">
+          <Image src="/logo.svg" alt="Learn2Earn" width={104} height={40} className="brand-logo mx-auto mb-6" />
+          <h1 className="page-heading text-2xl font-bold">Student Dashboard</h1>
+          <p className="text-muted-foreground text-sm mb-6">
+            Enter your Student ID to view your live wallet, active subscriptions, and NFC access card.
+          </p>
+
+          <form onSubmit={handleLogin} className="space-y-4 text-left">
+            <div>
+              <label htmlFor="student-id-input" className="block text-xs font-medium text-muted-foreground mb-1">
+                Student ID / Fellow Code
+              </label>
+              <input
+                id="student-id-input"
+                type="text"
+                placeholder="e.g. L2E-1234 or STU-1"
+                value={inputStudentId}
+                onChange={(e) => setInputStudentId(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 uppercase"
+                disabled={loggingIn}
+                autoFocus
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loggingIn || !inputStudentId.trim()}>
+              {loggingIn ? "Loading fellow account…" : "Access dashboard"}
             </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/">Back home</Link>
+          </form>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or create new</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/register">Register new student account</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">Back to home</Link>
             </Button>
           </div>
         </div>
@@ -59,50 +111,56 @@ export default function Dashboard() {
   const balance = s.monthlyStipend - spent;
   const item = data.catalog.find((c) => c.id === pending);
   const active = !!pending && s.subscriptions.includes(pending);
-  const adminMode = false
 
   return (
     <>
       <header className="site-header">
-        <div className="site-width">
+        <div className="site-width flex items-center justify-between">
           <Link href="/" className="flex items-center gap-4">
             <Image src="/logo.svg" alt="Learn2Earn" width={104} height={40} className="brand-logo" />
             <span className="hidden sm:inline text-sm text-muted-foreground">
               {s.campus} · {s.mode === "onsite" ? "Onsite" : "Online"}
             </span>
           </Link>
-          {adminMode && <div className="hidden md:flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Fellow:</span>
-            <select
-              aria-label="Switch Fellow"
-              value={s.id}
-              onChange={(e) => selectStudent(e.target.value)}
-              className="text-xs bg-muted/60 border rounded px-2 py-1 font-medium text-foreground cursor-pointer"
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowSwitchModal(true)}
+              className="flex items-center gap-2 text-left hover:opacity-80 transition cursor-pointer"
+              title="Click to switch student account"
             >
-              {data.students.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.firstName} {st.lastName} ({st.id})
-                </option>
-              ))}
-            </select>
-          </div>}
-          <span className="bg">
-            {s.firstName}
-            {" "}
-            {s.lastName}
-          </span>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/admin">Admin</Link>
-          </Button>
-          {/* <Button
-            variant="ghost"
-            size="icon"
-            title="Refresh live data from API"
-            aria-label="Refresh live data from API"
-            onClick={() => refreshWorkspace()}
-          >
-            <RotateCcw className="size-4" />
-          </Button> */}
+              <div className="hidden sm:block text-right">
+                <span className="text-sm font-semibold block leading-tight">
+                  {s.firstName} {s.lastName}
+                </span>
+                <span className="text-[11px] text-muted-foreground font-mono block">
+                  ID: {s.id}
+                </span>
+              </div>
+              <span className="avatar">
+                {s.firstName[0]}
+                {s.lastName[0]}
+              </span>
+            </button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSwitchModal(true)}
+            >
+              Switch ID
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logoutStudent}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Log out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -190,7 +248,7 @@ export default function Dashboard() {
               .filter((c) => !c.archived && c.modes.includes(s.mode))
               .map((c) => {
                 const on = s.subscriptions.includes(c.id);
-                const Icon = services.find((v) => v.id === c.icon)?.icon ?? Wallet;
+                const Icon = getServiceIcon(c.id || c.name);
                 return (
                   <div key={c.id} className={on ? "subscription-card subscribed" : "subscription-card"}>
                     <div className="flex gap-3 items-start">
@@ -329,6 +387,53 @@ export default function Dashboard() {
               {active ? "Unsubscribe" : "Subscribe"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSwitchModal} onOpenChange={setShowSwitchModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Switch Student Account</DialogTitle>
+            <DialogDescription>
+              Enter the student ID of the fellow account you would like to view or switch to.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleLogin} className="space-y-4 my-2">
+            <div>
+              <label htmlFor="switch-student-id-input" className="block text-xs font-medium text-muted-foreground mb-1">
+                Student ID
+              </label>
+              <input
+                id="switch-student-id-input"
+                type="text"
+                placeholder="e.g. L2E-1001 or STU-1"
+                value={inputStudentId}
+                onChange={(e) => setInputStudentId(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/40 uppercase"
+                disabled={loggingIn}
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button type="button" variant="outline" onClick={() => setShowSwitchModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loggingIn || !inputStudentId.trim()}>
+                {loggingIn ? "Switching…" : "Switch to Fellow"}
+              </Button>
+            </DialogFooter>
+          </form>
+
+          <div className="pt-2 border-t text-center">
+            <Link
+              href="/register"
+              onClick={() => setShowSwitchModal(false)}
+              className="text-xs text-primary hover:underline font-medium"
+            >
+              Or register a brand new student account →
+            </Link>
+          </div>
         </DialogContent>
       </Dialog>
     </>

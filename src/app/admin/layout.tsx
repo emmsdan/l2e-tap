@@ -29,9 +29,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard">Student view</Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/v1">V1 Portal</Link>
-            </Button>
           </div>
         </div>
         <nav className="admin-width overflow-x-auto flex gap-1">

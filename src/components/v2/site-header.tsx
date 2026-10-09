@@ -16,9 +16,6 @@ export function SiteHeader() {
           <Button asChild>
             <Link href="/register">Get started</Link>
           </Button>
-          <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
-            <Link href="/v1">V1 Portal</Link>
-          </Button>
         </nav>
       </div>
     </header>
@@ -34,9 +31,6 @@ export function SiteFooter() {
         </div>
         <span>Learn now. Earn your future.</span>
         <div className="flex items-center gap-4">
-          <Link href="/v1" className="hover:underline">
-            Switch to v1
-          </Link>
           <span>© 2026 Learn2Earn</span>
         </div>
       </div>

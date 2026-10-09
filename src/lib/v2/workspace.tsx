@@ -101,55 +101,12 @@ export function initialWorkspace(): Workspace {
     ];
   }
 
-  const first =
-    "Amaka.Tunde.Zainab.Chidi.Halima.Emeka.Fatima.Segun.Ngozi.Ibrahim.Blessing.Yusuf.Adaeze.Kelechi.Aisha.Bashir.Temi.Ifeoma.Musa.Damilola.Grace.Obinna.Rukayat.Peter.Esther.Suleiman.Nkechi.Femi.Hauwa.Chinedu".split(
-      "."
-    );
-  const last =
-    "Okafor.Bello.Adeyemi.Eze.Musa.Nwosu.Abubakar.Ogunleye.Ibrahim.Okonkwo.Lawal.Aliyu.Balogun.Uche.Sani".split(
-      "."
-    );
 
-  const students: Student[] = Array.from({ length: 48 }, (_, i) => {
-    const state = ["Kwara", "Lagos", "FCT - Abuja", "Oyo", "Kano", "Rivers", "Enugu"][i % 7] ?? "Kwara";
-    const mode = i % 4 === 3 ? "online" : "onsite";
-    const campus = mode === "online" ? "Remote" : campusFor(state);
-    const subscriptions = services
-      .filter((s) => mode === "onsite" || !onsiteIds.includes(s.id))
-      .filter((_, j) => (i + j * 3) % 4 !== 0)
-      .map((s) => s.id);
-
-    return {
-      id: "stu-" + (i + 1),
-      firstName: first[i % 30] ?? "Amaka",
-      lastName: last[(i * 5) % 15] ?? "Okafor",
-      email: `${(first[i % 30] ?? "Amaka").toLowerCase()}.${(last[(i * 5) % 15] ?? "Okafor").toLowerCase()}@learn2earn.ng`,
-      state,
-      campus,
-      mode,
-      cardId: "L2E-2026-" + (2000 + i),
-      monthsEnrolled: 1 + ((i * 7) % 11),
-      monthlyStipend: STIPEND,
-      subscriptions,
-      assignments: Object.fromEntries(
-        facilities
-          .filter((f) => f.campus === campus && (f.kind === "hub" || subscriptions.includes(f.kind)))
-          .map((f) => [f.kind, f.id])
-      ),
-      createdAt: "2026-01-01T00:00:00Z",
-      activity: [],
-    };
-  });
 
   return {
     student: null,
-    students,
-    catalog: services.map((s) => ({
-      ...s,
-      icon: s.id,
-      modes: onsiteIds.includes(s.id) ? ["onsite"] : ["onsite", "online"],
-      tapAccess: onsiteIds.includes(s.id),
-    })),
+    students: [],
+    catalog: [],
     facilities,
     readers: [
       ...facilities.map((f, i) => ({
@@ -177,6 +134,8 @@ export interface WorkspaceContextType {
   ready: boolean;
   activeStudentId: string | null;
   selectStudent: (studentId: string) => Promise<void>;
+  loginStudent: (studentId: string) => Promise<Student>;
+  logoutStudent: () => void;
   refreshWorkspace: () => Promise<void>;
   update: (fn: (w: Workspace) => Workspace) => void;
   // Specific V1 API backed mutations
@@ -314,48 +273,31 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           api.listPrices(),
         ]);
 
-        let updatedCatalog = initialWorkspace().catalog;
+        let updatedCatalog: CatalogService[] = [];
         let updatedStudents: Student[] = [];
 
-        // Sync prices from v1 API into catalog
+        // Sync prices from API into catalog - ONLY LIVE DATA
         if (pricesRes.status === "fulfilled" && pricesRes.value.prices?.length) {
           const apiPrices = pricesRes.value.prices;
-          updatedCatalog = updatedCatalog.map((catItem) => {
-            const matched = apiPrices.find(
-              (p) => p.service_key === catItem.id || p.service_name.toLowerCase() === catItem.name.toLowerCase()
-            );
-            if (matched) {
-              return {
-                ...catItem,
-                name: matched.service_name || catItem.name,
-                price: Math.round(matched.amount_kobo / 100),
-                archived: matched.status === "ARCHIVED",
-              };
-            }
-            return catItem;
+          updatedCatalog = apiPrices.map((p) => {
+            const isTapAccess = onsiteIds.includes(p.service_key);
+            const modes = isTapAccess ? ["onsite"] : ["onsite", "online"];
+            return {
+              id: p.service_key,
+              name: p.service_name,
+              description: `Support service: ${p.service_name}`,
+              price: Math.round(p.amount_kobo / 100),
+              modes,
+              tapAccess: isTapAccess,
+              archived: p.status === "ARCHIVED",
+              icon: p.service_key,
+            };
           });
-
-          // Add any extra services that exist on server
-          apiPrices.forEach((p) => {
-            const exists = updatedCatalog.some(
-              (c) => c.id === p.service_key || c.name.toLowerCase() === p.service_name.toLowerCase()
-            );
-            if (!exists) {
-              updatedCatalog.push({
-                id: p.service_key,
-                name: p.service_name,
-                description: `Subscribed service: ${p.service_name}`,
-                price: Math.round(p.amount_kobo / 100),
-                modes: ["onsite", "online"],
-                tapAccess: false,
-                archived: p.status === "ARCHIVED",
-                icon: "wallet",
-              });
-            }
-          });
+        } else if (localData?.catalog?.length) {
+          updatedCatalog = localData.catalog;
         }
 
-        // Sync students from v1 API into students list
+        // Sync students from API into students list
         if (studentsRes.status === "fulfilled" && studentsRes.value.students?.length) {
           const apiStudents = studentsRes.value.students;
           const mappedApiStudents: Student[] = apiStudents.map((s, idx) => {
@@ -376,38 +318,29 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
               campus: mode === "online" ? "Remote" : campusFor(state),
               mode,
               cardId: `L2E-${s.student_id.replace(/^stu-|^L2E-/, "")}`,
-              monthsEnrolled: existing?.monthsEnrolled ?? 1 + ((idx * 3) % 10),
+              monthsEnrolled: existing?.monthsEnrolled ?? 1,
               monthlyStipend: STIPEND,
-              subscriptions: existing?.subscriptions ?? ["hub", "meals"],
+              subscriptions: existing?.subscriptions ?? [],
               assignments: existing?.assignments ?? {},
               createdAt: s.created_at || new Date().toISOString(),
               activity: existing?.activity ?? [],
             };
           });
 
-          const serverIds = new Set(mappedApiStudents.map((s) => s.id));
-          const localOnly = (localData?.students || []).filter((s) => !serverIds.has(s.id));
-          updatedStudents = [...mappedApiStudents, ...localOnly];
-        } else if (localData?.students?.length) {
-          updatedStudents = localData.students;
+          updatedStudents = mappedApiStudents;
         }
 
-        // Determine which student to select for the dashboard
+        // Only select the student that signed up or logged in with their id
         const storedStudentId = localStorage.getItem("l2e_active_student_id");
-        let targetId = storedStudentId || localData?.student?.id;
+        let liveActiveStudent: Student | null = null;
 
-        if (!targetId && updatedStudents.length > 0) {
-          targetId = updatedStudents[0]?.id;
-        }
-
-        let liveActiveStudent: Student | null = localData?.student || null;
-
-        if (targetId) {
-          const baseStudent = updatedStudents.find((s) => s.id === targetId) || localData?.student;
-          liveActiveStudent = await fetchLiveStudentData(targetId, baseStudent);
-          if (liveActiveStudent) {
-            setActiveStudentIdState(targetId);
-            localStorage.setItem("l2e_active_student_id", targetId);
+        if (storedStudentId) {
+          const baseStudent = updatedStudents.find((s) => s.id === storedStudentId) || localData?.student;
+          liveActiveStudent = await fetchLiveStudentData(storedStudentId, baseStudent);
+          if (!liveActiveStudent) {
+            // Clear invalid stored student id
+            localStorage.removeItem("l2e_active_student_id");
+            setActiveStudentIdState(null);
           }
         }
 
@@ -612,18 +545,43 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // Log in student by student ID (validates against live API)
+  const loginStudent = async (studentId: string): Promise<Student> => {
+    const cleanId = studentId.trim();
+    if (!cleanId) throw new Error("Please enter a valid student ID");
+
+    // Fetch live data directly from server
+    const existing = data.students.find((s) => s.id.toLowerCase() === cleanId.toLowerCase());
+    const live = await fetchLiveStudentData(cleanId, existing);
+    if (!live) {
+      throw new Error(`Student with ID "${cleanId}" not found`);
+    }
+
+    setActiveStudentId(cleanId);
+    changed.current = true;
+    setData((prev) => ({
+      ...prev,
+      student: live,
+      students: prev.students.some((s) => s.id === live.id)
+        ? prev.students.map((s) => (s.id === live.id ? live : s))
+        : [live, ...prev.students],
+    }));
+
+    return live;
+  };
+
+  const logoutStudent = () => {
+    setActiveStudentId(null);
+    changed.current = true;
+    setData((prev) => ({
+      ...prev,
+      student: null,
+    }));
+  };
+
   // Select and switch student in dashboard
   const selectStudent = async (studentId: string) => {
-    setActiveStudentId(studentId);
-    const existing = data.students.find((s) => s.id === studentId);
-    const live = await fetchLiveStudentData(studentId, existing);
-    if (live) {
-      changed.current = true;
-      setData((prev) => ({
-        ...prev,
-        student: live,
-      }));
-    }
+    await loginStudent(studentId);
   };
 
   // Refresh entire workspace from live V1 APIs
@@ -677,6 +635,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         ready,
         activeStudentId,
         selectStudent,
+        loginStudent,
+        logoutStudent,
         refreshWorkspace,
         update: (fn) => {
           changed.current = true;
