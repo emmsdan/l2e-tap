@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [inputStudentId, setInputStudentId] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
   const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +54,7 @@ export default function Dashboard() {
   if (!ready) {
     return <div className="site-width py-16 text-muted-foreground">Loading your dashboard…</div>;
   }
+  const s = data.student;
 
   if (!s) {
     return (
@@ -144,13 +146,13 @@ export default function Dashboard() {
               </span>
             </button>
 
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={() => setShowSwitchModal(true)}
             >
               Switch ID
-            </Button>
+            </Button> */}
 
             <Button
               variant="ghost"
