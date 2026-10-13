@@ -26,7 +26,7 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col gap-2 pb-6 border-b border-slate-200">
-        <h1 className="text-4xl font-serif text-[#0b2866] tracking-tight">Talent Nation</h1>
+        <h1 className="text-4xl font-serif text-[#085ae8] tracking-tight">Talent Nation</h1>
         <h2 className="text-xl font-medium text-blue-600">Course: AI Engineering Fellowship</h2>
         <p className="text-slate-500 max-w-2xl mt-2">
           A practical AI Engineering Fellowship pathway for individuals who want to build real AI engineering skill,
@@ -36,7 +36,7 @@ export default function DashboardOverview() {
 
       <PageHeader title="Overview" sub="Wednesday, 7 October 2026"
         actions={<>
-          <RegisterStudentDialog trigger={<Button className="bg-[#0b2866] hover:bg-[#153f93]"><UserPlus className="size-4 mr-2" />Register student</Button>} />
+          <RegisterStudentDialog trigger={<Button className="bg-[#085ae8] hover:bg-[#153f93]"><UserPlus className="size-4 mr-2" />Register student</Button>} />
           <Button variant="outline" asChild><Link href="/pebbles"><Scale className="size-4 mr-2" />Reconcile Pebbles</Link></Button>
         </>} />
 

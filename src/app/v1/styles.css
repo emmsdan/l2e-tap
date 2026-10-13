@@ -57,7 +57,7 @@
   --card-foreground: oklch(0.13 0.02 240);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.02 240);
-  /* Primary: the deep blue from the sidebar #0b2866 */
+  /* Primary: the deep blue from the sidebar #085ae8 */
   --primary: oklch(0.3 0.1 260);
   --primary-foreground: oklch(0.98 0.01 160);
   --secondary: oklch(0.96 0.01 240);

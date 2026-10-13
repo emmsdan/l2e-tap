@@ -23,10 +23,10 @@ function SubscribeSheet({ studentId, existing }: { studentId: string; existing: 
 
   return (
     <Sheet open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setQueued(null); setKey(""); } }}>
-      <SheetTrigger asChild><Button size="sm" className="bg-[#0b2866] hover:bg-[#153f93]"><Plus className="size-4 mr-2" />Subscribe</Button></SheetTrigger>
+      <SheetTrigger asChild><Button size="sm" className="bg-[#085ae8] hover:bg-[#153f93]"><Plus className="size-4 mr-2" />Subscribe</Button></SheetTrigger>
       <SheetContent className="flex flex-col gap-4 bg-white border-l border-slate-200">
         <SheetHeader>
-          <SheetTitle className="text-[#0b2866]">Subscribe to a service</SheetTitle>
+          <SheetTitle className="text-[#085ae8]">Subscribe to a service</SheetTitle>
           <SheetDescription className="text-slate-500">Deduction is requested from Pebbles payroll. Access starts only after confirmation.</SheetDescription>
         </SheetHeader>
         {!queued ? (
@@ -42,7 +42,7 @@ function SubscribeSheet({ studentId, existing }: { studentId: string; existing: 
             <Button disabled={!key} onClick={async () => {
               const res = await subscribe(studentId, key);
               setQueued(res);
-            }} className="mt-4 bg-[#0b2866] hover:bg-[#153f93]">Request payroll deduction</Button>
+            }} className="mt-4 bg-[#085ae8] hover:bg-[#153f93]">Request payroll deduction</Button>
           </div>
         ) : (
           <div className="space-y-6 px-1 mt-4">
@@ -110,7 +110,7 @@ export default function StudentDetail() {
             <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-red-600 hover:border-red-200 transition-colors"><LogOut className="size-4 mr-2" />Withdraw</Button></AlertDialogTrigger>
             <AlertDialogContent className="bg-white">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-[#0b2866]">Withdraw {s.full_name}?</AlertDialogTitle>
+                <AlertDialogTitle className="text-[#085ae8]">Withdraw {s.full_name}?</AlertDialogTitle>
                 <AlertDialogDescription className="text-slate-500">All subscriptions are cancelled and Pebbles stop instructions are queued. Access continues until each paid period ends.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -169,7 +169,7 @@ export default function StudentDetail() {
           </Panel>
         </div>
 
-        <Panel title={<span className="flex items-center gap-2 text-[#0b2866]">Live access card <Hint tip="Queried live from Tap2Access on every view — never cached in L2E, to avoid state drift." /></span>} className="border-slate-200 shadow-sm border-t-4 border-t-[#0b2866]">
+        <Panel title={<span className="flex items-center gap-2 text-[#085ae8]">Live access card <Hint tip="Queried live from Tap2Access on every view — never cached in L2E, to avoid state drift." /></span>} className="border-slate-200 shadow-sm border-t-4 border-t-[#085ae8]">
           {tap2accessDown ? (
             <div className="flex flex-col items-center gap-3 p-10 text-center text-sm text-slate-500 bg-slate-50 rounded-b-lg">
               <div className="p-3 bg-white rounded-full shadow-sm"><WifiOff className="size-6 text-slate-400" /></div>
@@ -177,7 +177,7 @@ export default function StudentDetail() {
             </div>
           ) : (
             <div className="space-y-6 p-5 bg-white rounded-b-lg">
-              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0b2866] to-[#153f93] p-5 text-white shadow-md">
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#085ae8] to-[#153f93] p-5 text-white shadow-md">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <CreditCard className="size-24 -mr-4 -mt-4" />
                 </div>

@@ -30,7 +30,7 @@ export default function Students() {
       <PageHeader
         title="Students"
         sub={`${students.length} fellows on roster`}
-        actions={<RegisterStudentDialog trigger={<Button className="bg-[#0b2866] hover:bg-[#153f93]"><UserPlus className="size-4 mr-2" />Register</Button>} />}
+        actions={<RegisterStudentDialog trigger={<Button className="bg-[#085ae8] hover:bg-[#153f93]"><UserPlus className="size-4 mr-2" />Register</Button>} />}
       />
 
       <Panel className="border-slate-200 shadow-sm overflow-hidden">

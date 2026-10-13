@@ -253,7 +253,7 @@ export default function PointOfSale() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col font-sans">
       {/* Top Header - Supermarket / OPay / Square POS Style */}
-      <header className="bg-[#0b2866] text-white px-6 py-3.5 flex items-center justify-between shadow-md flex-wrap gap-5">
+      <header className="bg-[#085ae8] text-white px-6 py-3.5 flex items-center justify-between shadow-md flex-wrap gap-5">
         <div className="flex items-center gap-3">
           <Image src="/logo.svg" alt="logo" width={100} height={40} className="bg-white rounded-full p-2 pr-4" />
           <div>
@@ -276,7 +276,7 @@ export default function PointOfSale() {
             </DialogTrigger>
             <DialogContent className="bg-white sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-[#0b2866]">Create Item / Service</DialogTitle>
+                <DialogTitle className="text-[#085ae8]">Create Item / Service</DialogTitle>
                 <DialogDescription>
                   Instantly add a new product or service price to this POS catalogue.
                 </DialogDescription>
@@ -309,7 +309,7 @@ export default function PointOfSale() {
                 </div>
                 <DialogFooter className="pt-2">
                   <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={isCreatingService} className="bg-[#0b2866] hover:bg-[#153f93] text-white">
+                  <Button type="submit" disabled={isCreatingService} className="bg-[#085ae8] hover:bg-[#153f93] text-white">
                     {isCreatingService ? "Saving..." : "Save to Catalogue"}
                   </Button>
                 </DialogFooter>
@@ -331,7 +331,7 @@ export default function PointOfSale() {
           <div className="flex items-center justify-between bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm">
             <div>
               <h2 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Tag className="size-4 text-[#0b2866]" /> Available Items & Services
+                <Tag className="size-4 text-[#085ae8]" /> Available Items & Services
               </h2>
               <p className="text-xs text-slate-500">Tap any item to add to bill, or use Quick Pay</p>
             </div>
@@ -398,7 +398,7 @@ export default function PointOfSale() {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full overflow-hidden">
 
             {/* Register Top Banner */}
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
+            <div className="bg-[#085ae8] text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Receipt className="size-5 text-orange-400" />
                 <div>
@@ -491,7 +491,7 @@ export default function PointOfSale() {
                 </div>
                 <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                   <span className="font-extrabold text-slate-900 text-base">Total Due</span>
-                  <span className="font-mono font-black text-2xl text-[#0b2866]">
+                  <span className="font-mono font-black text-2xl text-[#085ae8]">
                     {formatNaira(totalKobo)}
                   </span>
                 </div>
@@ -501,7 +501,7 @@ export default function PointOfSale() {
               <Button
                 onClick={openCheckout}
                 disabled={cart.length === 0}
-                className="w-full h-14 bg-[#0b2866] hover:bg-[#153f93] text-white font-bold text-lg rounded-xl shadow-lg transition-transform active:scale-[0.99] flex items-center justify-center gap-3"
+                className="w-full h-14 bg-[#085ae8] hover:bg-[#153f93] text-white font-bold text-lg rounded-xl shadow-lg transition-transform active:scale-[0.99] flex items-center justify-center gap-3"
               >
                 <CreditCard className="size-6" />
                 Tap Student NFC Card
@@ -525,7 +525,7 @@ export default function PointOfSale() {
         <DialogContent className="sm:max-w-md bg-white border border-slate-200 p-0 overflow-hidden rounded-3xl shadow-2xl">
 
           {/* Header styling */}
-          <div className="bg-[#0b2866] px-6 py-5 text-white text-center relative">
+          <div className="bg-[#085ae8] px-6 py-5 text-white text-center relative">
             <h3 className="text-sm font-semibold tracking-wider uppercase text-blue-200">Payment Terminal</h3>
             <p className="text-2xl font-black font-mono mt-1 text-white">{formatNaira(totalKobo)}</p>
             <p className="text-xs text-blue-300 mt-0.5">
@@ -579,7 +579,7 @@ export default function PointOfSale() {
                       <Button
                         type="submit"
                         disabled={!cardInput.trim()}
-                        className="bg-[#0b2866] hover:bg-[#153f93] text-white"
+                        className="bg-[#085ae8] hover:bg-[#153f93] text-white"
                       >
                         Authorize
                       </Button>
@@ -635,7 +635,7 @@ export default function PointOfSale() {
 
                 <Button
                   onClick={resetAfterSuccess}
-                  className="w-full h-12 bg-slate-900 hover:bg-black text-white font-bold rounded-xl mt-4"
+                  className="w-full h-12 bg-[#085ae8] hover:bg-black text-white font-bold rounded-xl mt-4"
                 >
                   Done / Next Customer
                 </Button>
@@ -666,7 +666,7 @@ export default function PointOfSale() {
                       setMessage("");
                       setCardInput("");
                     }}
-                    className="flex-1 bg-[#0b2866] hover:bg-[#153f93] text-white"
+                    className="flex-1 bg-[#085ae8] hover:bg-[#153f93] text-white"
                   >
                     Try Tap Again
                   </Button>

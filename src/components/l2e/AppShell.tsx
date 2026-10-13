@@ -15,12 +15,12 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/pos", label: "Tap2Pay", icon: ShoppingCart },
-  { to: "/students", label: "Students", icon: Users },
-  { to: "/prices", label: "Pricing", icon: Tags },
-  { to: "/attendance", label: "Access Logs", icon: DoorOpen },
-  { to: "/pebbles", label: "Reconciliation", icon: Scale },
+  { to: "/v1/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/v1/pos", label: "Tap2Pay", icon: ShoppingCart },
+  { to: "/v1/students", label: "Students", icon: Users },
+  { to: "/v1/prices", label: "Pricing", icon: Tags },
+  { to: "/v1/attendance", label: "Access Logs", icon: DoorOpen },
+  { to: "/v1/pebbles", label: "Reconciliation", icon: Scale },
 ] as const;
 
 function SettingsDialog() {
@@ -80,13 +80,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   // Using explicit NO DARKMODE strategy. Colors are forced into the light-mode/sidebar-blue style.
 
-  if (pathname === "/" || pathname.startsWith("/portal") || pathname.startsWith("/pos")) {
+  if (pathname === "/" || pathname.startsWith("/v1/portal") || pathname.startsWith("/v1/pos")) {
     return <main className="font-sans min-h-screen bg-slate-50">{children}</main>;
   }
 
   return (
     <div className="flex min-h-screen font-sans bg-[#f4f7fb]">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#0b2866] text-white md:flex shadow-xl shadow-blue-900/10 z-20">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#085ae8] text-white md:flex shadow-xl shadow-blue-900/10 z-20">
         <div className="flex items-center gap-3 px-6 py-8">
           <Image src="/logo.svg" height={32} width={90} alt="L2E Logo" priority className="filter brightness-[2292]" />
         </div>
@@ -103,7 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="py-6 px-3 bg-[#081d4a]"><Health /></div>
+        <div className="py-6 px-3 bg-[#085ae8]"><Health /></div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -117,7 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-[#0b2866] hover:bg-slate-50 transition-colors"
+              className="text-xs font-medium px-3 py-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-[#085ae8] hover:bg-slate-50 transition-colors"
             >
               Switch to v2
             </Link>

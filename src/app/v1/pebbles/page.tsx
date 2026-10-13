@@ -49,7 +49,7 @@ export default function Pebbles() {
     <div className="space-y-6 animate-in fade-in duration-300">
       <PageHeader title="Payroll reconciliation" sub={`Last report ${ran.replace("T", " ")}`}
         actions={
-          <Button disabled={running} className="bg-[#0b2866] hover:bg-[#153f93]" onClick={async () => {
+          <Button disabled={running} className="bg-[#085ae8] hover:bg-[#153f93]" onClick={async () => {
             setRunning(true);
             try {
               const res = await api.reconcile();

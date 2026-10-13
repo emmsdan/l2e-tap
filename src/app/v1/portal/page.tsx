@@ -53,7 +53,7 @@ export default function StudentPortal() {
           </svg>
         </div>
         <div className="leading-none flex flex-col">
-          <span className="text-lg font-bold font-sans tracking-tight text-[#0b2866]">LEARN2EARN</span>
+          <span className="text-lg font-bold font-sans tracking-tight text-[#085ae8]">LEARN2EARN</span>
           <span className="text-sm font-medium font-sans tracking-tight text-slate-500 mt-0.5">Student Portal</span>
         </div>
         <div className="ml-auto">
@@ -87,7 +87,7 @@ export default function StudentPortal() {
                 </div>
                 {error && <p className="text-sm text-red-600 font-medium mt-2">{error}</p>}
               </div>
-              <Button type="submit" className="w-full h-12 text-base bg-[#0b2866] hover:bg-[#153f93]">
+              <Button type="submit" className="w-full h-12 text-base bg-[#085ae8] hover:bg-[#153f93]">
                 Continue <ChevronRight className="size-4 ml-1" />
               </Button>
             </form>
@@ -128,7 +128,7 @@ export default function StudentPortal() {
 
             <div className="mt-8 pt-6 border-t border-slate-100 flex gap-4">
               <Button variant="outline" onClick={() => setStep(1)} className="h-12 w-1/3">Back</Button>
-              <Button onClick={handleSubscribe} disabled={!selectedServiceKey} className="h-12 flex-1 bg-[#0b2866] hover:bg-[#153f93] text-base">
+              <Button onClick={handleSubscribe} disabled={!selectedServiceKey} className="h-12 flex-1 bg-[#085ae8] hover:bg-[#153f93] text-base">
                 Confirm Subscription
               </Button>
             </div>

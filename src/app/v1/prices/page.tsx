@@ -96,18 +96,18 @@ export default function Prices() {
           <div className="flex flex-wrap gap-2">
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-[#0b2866] hover:bg-[#153f93] text-white">
+                <Button className="bg-[#085ae8] hover:bg-[#153f93] text-white">
                   <Plus className="size-4 mr-1.5" /> New Service / Price
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-white sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-[#0b2866]">Create New Service</DialogTitle>
+                  <DialogTitle className="text-[#085ae8]">Create New Service</DialogTitle>
                   <DialogDescription>
                     Add a new service catalogue item and set its monthly price in Naira.
                   </DialogDescription>
                 </DialogHeader>
-                <Button className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={handleCreateDefault}>
+                <Button className="bg-[#085ae8] hover:bg-[#153f93] text-white" onClick={handleCreateDefault}>
                   <Plus className="size-4 mr-1.5" /> Create Default Prices List
                 </Button>
                 <form onSubmit={handleCreate} className="space-y-4 py-2">
@@ -161,7 +161,7 @@ export default function Prices() {
                   </div>
                   <DialogFooter className="pt-2">
                     <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-                    <Button type="submit" disabled={creating} className="bg-[#0b2866] hover:bg-[#153f93] text-white">
+                    <Button type="submit" disabled={creating} className="bg-[#085ae8] hover:bg-[#153f93] text-white">
                       {creating ? "Creating..." : "Create Service"}
                     </Button>
                   </DialogFooter>
@@ -175,7 +175,7 @@ export default function Prices() {
       <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm shadow-sm">
         <RefreshCcw className="mt-0.5 size-4 shrink-0 text-blue-600" />
         <p className="text-blue-900">
-          <b className="font-semibold text-[#0b2866]">Auto-repricing:</b> changing a price queues an <span className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-blue-100">UPDATE</span> payroll instruction to Pebbles for every active subscriber of that service. New amounts apply from the next deduction cycle.
+          <b className="font-semibold text-[#085ae8]">Auto-repricing:</b> changing a price queues an <span className="font-mono text-xs bg-white px-1 py-0.5 rounded border border-blue-100">UPDATE</span> payroll instruction to Pebbles for every active subscriber of that service. New amounts apply from the next deduction cycle.
         </p>
       </div>
 
@@ -207,7 +207,7 @@ export default function Prices() {
                       }}>
                         <span className="text-slate-400 font-medium">₦</span>
                         <Input autoFocus type="number" min={1} step="0.01" value={edit.naira} onChange={(e) => setEdit({ ...edit, naira: e.target.value })} className="h-8 w-32 font-mono border-slate-300" />
-                        <Button size="sm" type="submit" className="bg-[#0b2866] hover:bg-[#153f93]">Save</Button>
+                        <Button size="sm" type="submit" className="bg-[#085ae8] hover:bg-[#153f93]">Save</Button>
                         <Button size="sm" variant="ghost" type="button" onClick={() => setEdit(null)}>Cancel</Button>
                       </form>
                     ) : (
@@ -240,13 +240,13 @@ export default function Prices() {
       <AlertDialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0b2866]">Update {confirm?.svc.name} price?</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#085ae8]">Update {confirm?.svc.name} price?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-4 mt-2">
                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                   <p className="font-mono text-base text-slate-500 line-through">{confirm && formatNaira(confirm.svc.monthly_kobo)}</p>
                   <span className="text-slate-400">→</span>
-                  <p className="font-mono text-lg font-bold text-[#0b2866]">{confirm && formatNaira(confirm.kobo)}</p>
+                  <p className="font-mono text-lg font-bold text-[#085ae8]">{confirm && formatNaira(confirm.kobo)}</p>
                 </div>
                 <p className="rounded-md border border-orange-200 bg-orange-50 p-3 text-orange-900 shadow-sm text-sm">
                   This will automatically queue amount updates for all <b>{confirm?.svc.active_subscribers}</b> active subscribers.
@@ -256,7 +256,7 @@ export default function Prices() {
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel className="border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-[#0b2866] hover:bg-[#153f93] text-white" onClick={async () => {
+            <AlertDialogAction className="bg-[#085ae8] hover:bg-[#153f93] text-white" onClick={async () => {
               if (!confirm) return;
               const n = await updatePrice(confirm.svc.key, confirm.kobo);
               toast.success(`Price updated · ${n} payroll updates queued`);
@@ -270,7 +270,7 @@ export default function Prices() {
       <AlertDialog open={!!archive} onOpenChange={(o) => !o && setArchive(null)}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0b2866]">Archive {archive?.name}?</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#085ae8]">Archive {archive?.name}?</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500">
               New subscriptions will be blocked. Existing subscriptions are unaffected.
             </AlertDialogDescription>

@@ -54,13 +54,13 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/portal"
-              className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[#0b2866] transition-colors"
+              className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[#085ae8] transition-colors"
             >
               Student Portal
             </Link>
             <Link
               href="/pos"
-              className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[#0b2866] transition-colors"
+              className="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[#085ae8] transition-colors"
             >
               Tap2Pay Kiosk
             </Link>
@@ -69,7 +69,7 @@ export default function LandingPage() {
             <Button
               onClick={handleL2ESSO}
               disabled={ssoLoading}
-              className="bg-[#0b2866] hover:bg-[#153f93] text-white font-medium px-5 shadow-sm transition-all flex items-center gap-2 h-11"
+              className="bg-[#085ae8] hover:bg-[#153f93] text-white font-medium px-5 shadow-sm transition-all flex items-center gap-2 h-11"
             >
               {ssoLoading ? (
                 <span className="inline-block size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -84,16 +84,16 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-20 pb-24 md:pt-28 md:pb-32 bg-gradient-to-b from-white via-blue-50/30 to-[#f8fafc]">
-        <div className="absolute inset-0 bg-[radial-gradient(#0b2866_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#085ae8_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-[#0b2866] text-xs font-semibold tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-[#085ae8] text-xs font-semibold tracking-wide">
               <Sparkles className="size-3.5 text-orange-500" />
               <span>Campus Operations & Automated Physical Access</span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-serif text-[#0b2866] tracking-tight leading-[1.15]">
+            <h1 className="text-4xl md:text-6xl font-serif text-[#085ae8] tracking-tight leading-[1.15]">
               Empowering Fellows with <span className="text-orange-500 italic">Seamless Tap & Pay</span>
             </h1>
 
@@ -107,7 +107,7 @@ export default function LandingPage() {
                 size="lg"
                 onClick={handleL2ESSO}
                 disabled={ssoLoading}
-                className="w-full sm:w-auto h-14 px-8 text-base bg-[#0b2866] hover:bg-[#153f93] text-white shadow-xl shadow-blue-900/15 flex items-center justify-center gap-3 transition-all hover:scale-[1.02]"
+                className="w-full sm:w-auto h-14 px-8 text-base bg-[#085ae8] hover:bg-[#153f93] text-white shadow-xl shadow-blue-900/15 flex items-center justify-center gap-3 transition-all hover:scale-[1.02]"
               >
                 <KeyRound className="size-5 text-orange-400" />
                 <span className="font-semibold">Sign in with L2E SSO</span>
@@ -133,8 +133,8 @@ export default function LandingPage() {
           {/* Quick Preview Grid */}
           <div className="mt-16 md:mt-24 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="size-12 rounded-xl bg-blue-50 text-[#0b2866] flex items-center justify-center mb-5">
-                <DoorOpen className="size-6 text-[#0b2866]" />
+              <div className="size-12 rounded-xl bg-blue-50 text-[#085ae8] flex items-center justify-center mb-5">
+                <DoorOpen className="size-6 text-[#085ae8]" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Live Access Entitlements</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
@@ -170,7 +170,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Active Cohort Programme</p>
-            <h2 className="text-2xl font-serif text-[#0b2866]">Talent Nation AI Engineering Fellowship</h2>
+            <h2 className="text-2xl font-serif text-[#085ae8]">Talent Nation AI Engineering Fellowship</h2>
             <p className="text-sm text-slate-500">
               Rigorous, hands-on engineering pathway shipping production-ready intelligent software systems.
             </p>
@@ -178,7 +178,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Button
               onClick={handleL2ESSO}
-              className="bg-[#0b2866] hover:bg-[#153f93] text-white"
+              className="bg-[#085ae8] hover:bg-[#153f93] text-white"
             >
               Access Admin Hub
             </Button>
@@ -190,7 +190,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto bg-slate-900 text-slate-400 py-10 border-t border-slate-800">
+      <footer className="mt-auto bg-[#085ae8] text-slate-400 py-10 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-3">
             <Image src="/logo.svg" width={90} height={32} alt="LEARN2EARN" className="filter brightness-[23232]" />
