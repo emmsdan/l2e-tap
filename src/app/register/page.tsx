@@ -4,17 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Building2, Laptop, Check, X, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Laptop, Check, X, Wallet, Award, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { money, STIPEND } from "@/lib/v2/support";
 import { states, campusFor, useWorkspace, total, type Student } from "@/lib/v2/workspace";
 
-export default function Register() {
+function Register() {
   const router = useRouter();
   const { data, registerStudentApi } = useWorkspace();
   const [submitting, setSubmitting] = useState(false);
-  const [step, setStep] = useState(0);
+  const [sponsorship, setSponsorship] = useState<"self" | "l2e" | null>(null);
   const [basics, setBasics] = useState({
     firstName: "",
     lastName: "",
@@ -25,7 +25,7 @@ export default function Register() {
   const [mode, setMode] = useState<"onsite" | "online" | null>(null);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
 
-  const questions = [
+  const allQuestions = [
     {
       key: "hasLaptop",
       title: "Do you already have a working laptop?",
@@ -34,6 +34,7 @@ export default function Register() {
       no: "No, I don't have one",
       eyebrow: "Your setup",
       grants: "",
+      modes: ["onsite", "online"],
     },
     {
       key: "needLaptop",
@@ -43,47 +44,49 @@ export default function Register() {
       no: "No, I'll sort it myself",
       eyebrow: "Your setup",
       grants: "laptop",
+      modes: ["onsite", "online"],
+      condition: (ans: Record<string, boolean>) => !ans["hasLaptop"],
     },
-    ...(mode === "onsite"
-      ? [
-          {
-            key: "hub",
-            title: "Do you need a desk at the learning hub?",
-            helper: "Power, fast internet, mentors and your cohort in the room.",
-            yes: "Yes, give me hub access",
-            no: "No, I'll work elsewhere",
-            eyebrow: "Where you work",
-            grants: "hub",
-          },
-          {
-            key: "accommodation",
-            title: "Do you need accommodation?",
-            helper: "A shared room within walking distance of campus.",
-            yes: "Yes, I need a place",
-            no: "No, I have somewhere",
-            eyebrow: "Where you sleep",
-            grants: "accommodation",
-          },
-          {
-            key: "transport",
-            title: "Do you need transportation to campus?",
-            helper: "Daily shuttle, tap your card to board.",
-            yes: "Yes, add the shuttle",
-            no: "No, I'll make my way",
-            eyebrow: "Getting there",
-            grants: "transport",
-          },
-          {
-            key: "meals",
-            title: "Do you need a feeding arrangement?",
-            helper: "Two meals on every training day, paid by tapping your card.",
-            yes: "Yes, feed me on campus",
-            no: "No, I'll handle meals",
-            eyebrow: "Feeding",
-            grants: "meals",
-          },
-        ]
-      : []),
+    {
+      key: "hub",
+      title: "Do you need a desk at the learning hub?",
+      helper: "Power, fast internet, mentors and your cohort in the room.",
+      yes: "Yes, give me hub access",
+      no: "No, I'll work elsewhere",
+      eyebrow: "Where you work",
+      grants: "hub",
+      modes: ["onsite"],
+    },
+    {
+      key: "accommodation",
+      title: "Do you need accommodation?",
+      helper: "A shared room within walking distance of campus.",
+      yes: "Yes, I need a place",
+      no: "No, I have somewhere",
+      eyebrow: "Where you sleep",
+      grants: "accommodation",
+      modes: ["onsite"],
+    },
+    {
+      key: "transport",
+      title: "Do you need transportation to campus?",
+      helper: "Daily shuttle, tap your card to board.",
+      yes: "Yes, add the shuttle",
+      no: "No, I'll make my way",
+      eyebrow: "Getting there",
+      grants: "transport",
+      modes: ["onsite"],
+    },
+    {
+      key: "meals",
+      title: "Do you need a feeding arrangement?",
+      helper: "Two meals on every training day, paid by tapping your card.",
+      yes: "Yes, feed me on campus",
+      no: "No, I'll handle meals",
+      eyebrow: "Feeding",
+      grants: "meals",
+      modes: ["onsite"],
+    },
     {
       key: "data",
       title: "Do you need a monthly data bundle?",
@@ -92,6 +95,7 @@ export default function Register() {
       no: "No, I'm covered",
       eyebrow: "Connectivity",
       grants: "data",
+      modes: ["onsite", "online"],
     },
     {
       key: "health",
@@ -101,6 +105,7 @@ export default function Register() {
       no: "No, thanks",
       eyebrow: "Wellbeing",
       grants: "health",
+      modes: ["onsite", "online"],
     },
     {
       key: "allowance",
@@ -110,14 +115,64 @@ export default function Register() {
       no: "No, I don't need it",
       eyebrow: "Cash",
       grants: "allowance",
+      modes: ["onsite", "online"],
     },
   ];
 
-  // step 0: basics, step 1: mode, steps 2..(questions.length + 1): questions, step questions.length + 2: summary
-  const count = mode ? questions.length + 3 : 3;
-  const q = questions[step - 2];
-  const summary = step === questions.length + 2;
-  const selected = questions.filter((item) => item.grants && answers[item.key]).map((item) => item.grants);
+  // Active question list filtered by current mode and condition
+  const getActiveQuestions = (currentAnswers: Record<string, boolean>) => {
+    if (!mode) return [];
+    return allQuestions.filter((item) => {
+      if (!item.modes.includes(mode)) return false;
+      if (item.condition && !item.condition(currentAnswers)) return false;
+      return true;
+    });
+  };
+
+  const activeQuestions = getActiveQuestions(answers);
+
+  // Define total progression keys: "sponsorship" -> "basics" -> "mode" -> [question keys] -> "summary"
+  const stepKeys = ["sponsorship", "basics", "mode", ...activeQuestions.map((item) => item.key), "summary"];
+
+  // Current active step ID
+  const [currentStepKey, setCurrentStepKey] = useState<string>("sponsorship");
+
+  // Keep currentStepKey valid if questions change (e.g. needLaptop conditionally removed)
+  const currentStepIndex = Math.max(0, stepKeys.indexOf(currentStepKey));
+  const activeStepKey = stepKeys.includes(currentStepKey) ? currentStepKey : stepKeys[currentStepIndex] || "summary";
+
+  const isSponsorshipStep = activeStepKey === "sponsorship";
+  const isBasicsStep = activeStepKey === "basics";
+  const isModeStep = activeStepKey === "mode";
+  const summary = activeStepKey === "summary";
+  const q = activeQuestions.find((item) => item.key === activeStepKey);
+
+  const count = stepKeys.length;
+  const currentStepNumber = stepKeys.indexOf(activeStepKey) + 1;
+
+  const goToNextStep = (updatedAnswers = answers) => {
+    const nextActiveQuestions = getActiveQuestions(updatedAnswers);
+    const nextStepKeys = ["sponsorship", "basics", "mode", ...nextActiveQuestions.map((item) => item.key), "summary"];
+    const idx = nextStepKeys.indexOf(activeStepKey);
+    if (idx !== -1 && idx + 1 < nextStepKeys.length) {
+      setCurrentStepKey(nextStepKeys[idx + 1]);
+    } else {
+      setCurrentStepKey("summary");
+    }
+  };
+
+  const goToPrevStep = () => {
+    const idx = stepKeys.indexOf(activeStepKey);
+    if (idx > 0) {
+      setCurrentStepKey(stepKeys[idx - 1]);
+    } else {
+      router.push("/");
+    }
+  };
+
+  const selected = allQuestions
+    .filter((item) => item.grants && answers[item.key])
+    .map((item) => item.grants);
   const spent = total(selected, data.catalog);
   const valid =
     basics.firstName.trim().length > 1 &&
@@ -162,38 +217,83 @@ export default function Register() {
               Single-page form
             </Link>
             <span className="text-sm text-muted-foreground">
-              Step {step + 1} of {count}
+              Step {currentStepNumber} of {count}
             </span>
           </div>
         </div>
-        <progress className="wizard-progress" max={count} value={step + 1} />
+        <progress className="wizard-progress" max={count} value={currentStepNumber} />
       </header>
 
       <main className="wizard-width wizard-layout">
         <div>
           <p className="text-sm uppercase font-medium text-primary">
-            {step === 0 ? "Let's meet you" : step === 1 ? "Your programme" : summary ? "Your package" : q?.eyebrow}
+            {isSponsorshipStep
+              ? "Sponsorship"
+              : isBasicsStep
+                ? "Let's meet you"
+                : isModeStep
+                  ? "Your programme"
+                  : summary
+                    ? "Your package"
+                    : q?.eyebrow}
           </p>
           <h1 className="page-heading mt-3">
-            {step === 0
-              ? "First, the basics."
-              : step === 1
-              ? "How will you learn?"
-              : summary
-              ? "You're all set."
-              : q?.title}
+            {isSponsorshipStep
+              ? "How do you want to be sponsored?"
+              : isBasicsStep
+                ? "First, the basics."
+                : isModeStep
+                  ? "How will you learn?"
+                  : summary
+                    ? "You're all set."
+                    : q?.title}
           </h1>
           <p className="text-muted-foreground">
-            {step === 0
-              ? "We use this to issue your student ID and match you to the nearest campus."
-              : step === 1
-              ? "Pick the setup that works for you. Your support package follows."
-              : summary
-              ? "Here’s your monthly support package. You can change it anytime."
-              : q?.helper}
+            {isSponsorshipStep
+              ? "Choose whether you are covering your programme independently or joining under Learn2Earn sponsorship."
+              : isBasicsStep
+                ? "We use this to issue your student ID and match you to the nearest campus."
+                : isModeStep
+                  ? "Pick the setup that works for you. Your support package follows."
+                  : summary
+                    ? "Here’s your monthly support package. You can change it anytime."
+                    : q?.helper}
           </p>
 
-          {step === 0 ? (
+          {isSponsorshipStep ? (
+            <div className="mt-8 space-y-4">
+              {[
+                {
+                  id: "self" as const,
+                  title: "Self Sponsored",
+                  helper: "You or your private guardian will cover your programme and resources directly.",
+                  icon: UserCheck,
+                },
+                {
+                  id: "l2e" as const,
+                  title: "Learn2Earn Sponsored",
+                  helper: "Zero upfront tuition with monthly support stipend, hub facilities, and stipend wallet.",
+                  icon: Award,
+                },
+              ].map((item) => (
+                <Button
+                  key={item.id}
+                  variant="outline"
+                  className={sponsorship === item.id ? "choice choice-active" : "choice"}
+                  onClick={() => {
+                    setSponsorship(item.id);
+                    goToNextStep();
+                  }}
+                >
+                  <item.icon />
+                  <span>
+                    <strong>{item.title}</strong>
+                    <small>{item.helper}</small>
+                  </span>
+                </Button>
+              ))}
+            </div>
+          ) : isBasicsStep ? (
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               {(["firstName", "lastName", "email", "phone"] as const).map((key, i) => (
                 <label className="grid gap-2 text-sm" key={key}>
@@ -221,7 +321,7 @@ export default function Register() {
                 </select>
               </label>
             </div>
-          ) : step === 1 ? (
+          ) : isModeStep ? (
             <div className="mt-8 space-y-4">
               {(["onsite", "online"] as const).map((m) => (
                 <Button
@@ -262,7 +362,7 @@ export default function Register() {
                         onClick={() =>
                           setAnswers({
                             ...answers,
-                            [questions.find((query) => query.grants === s.id)?.key ?? ""]: false,
+                            [allQuestions.find((query) => query.grants === s.id)?.key ?? ""]: false,
                           })
                         }
                       >
@@ -285,18 +385,11 @@ export default function Register() {
                   className={answers[q.key] === a ? "choice choice-active" : "choice"}
                   onClick={() => {
                     const newAnswers = { ...answers, [q.key]: a };
-                    // If student already has a laptop, ensure needLaptop is false
                     if (q.key === "hasLaptop" && a === true) {
                       newAnswers["needLaptop"] = false;
                     }
                     setAnswers(newAnswers);
-
-                    // If on hasLaptop and user answers YES (they own a laptop), skip the needLaptop question
-                    if (q.key === "hasLaptop" && a === true) {
-                      setStep(step + 2);
-                    } else {
-                      setStep(step + 1);
-                    }
+                    goToNextStep(newAnswers);
                   }}
                 >
                   {a ? <Check /> : <X />}
@@ -312,26 +405,22 @@ export default function Register() {
           ) : null}
 
           <div className="flex justify-between mt-10 gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => {
-                if (step === 0) {
-                  router.push("/");
-                } else if (step === 4 && answers["hasLaptop"]) {
-                  // If we skipped step 3 (needLaptop) because user has a laptop, step back to step 2 (hasLaptop)
-                  setStep(2);
-                } else {
-                  setStep(step - 1);
-                }
-              }}
-            >
+            <Button variant="ghost" onClick={goToPrevStep}>
               <ArrowLeft />
               Back
             </Button>
-            {(step < 2 || summary) && (
+            {(isSponsorshipStep || isBasicsStep || isModeStep || summary) && (
               <Button
-                disabled={step === 0 ? !valid : step === 1 ? !mode : false}
-                onClick={() => (summary ? finish() : setStep(step + 1))}
+                disabled={
+                  isSponsorshipStep
+                    ? !sponsorship
+                    : isBasicsStep
+                      ? !valid
+                      : isModeStep
+                        ? !mode
+                        : false
+                }
+                onClick={() => (summary ? finish() : goToNextStep())}
               >
                 {summary ? "Confirm and create account" : "Continue"}
                 <ArrowRight />
@@ -371,3 +460,6 @@ export default function Register() {
     </div>
   );
 }
+
+import SinglePageRegister from "./single/page"
+export default SinglePageRegister

@@ -14,6 +14,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   Info,
+  Award,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,7 @@ export default function SinglePageRegister() {
   const [submitting, setSubmitting] = useState(false);
 
   // Form state
+  const [sponsorship, setSponsorship] = useState<"self" | "l2e">("l2e");
   const [basics, setBasics] = useState({
     firstName: "",
     lastName: "",
@@ -176,11 +179,88 @@ export default function SinglePageRegister() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left 7-8 Columns: All Form Sections */}
             <div className="lg:col-span-7 xl:col-span-8 space-y-8">
-              {/* SECTION 1: Personal Information */}
+              {/* SECTION 1: Sponsorship */}
               <section className="bg-card border rounded-2xl p-6 sm:p-7 shadow-xs">
                 <div className="flex items-center gap-3 pb-5 border-b mb-6">
                   <div className="size-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
                     1
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold">How do you want to be sponsored?</h2>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Select your sponsorship model for the programme.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div
+                    onClick={() => setSponsorship("self")}
+                    className={`cursor-pointer border-2 rounded-xl p-4 transition-all flex flex-col justify-between ${
+                      sponsorship === "self"
+                        ? "border-primary bg-primary/5 shadow-xs"
+                        : "border-border hover:border-muted-foreground/30 bg-card"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                        <UserCheck className="size-5" />
+                      </div>
+                      <div
+                        className={`size-5 rounded-full border flex items-center justify-center ${
+                          sponsorship === "self"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-muted-foreground/30"
+                        }`}
+                      >
+                        {sponsorship === "self" && <Check className="size-3" />}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <h3 className="font-bold text-base">Self Sponsored</h3>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        You or your private guardian will cover your programme and resources directly.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setSponsorship("l2e")}
+                    className={`cursor-pointer border-2 rounded-xl p-4 transition-all flex flex-col justify-between ${
+                      sponsorship === "l2e"
+                        ? "border-primary bg-primary/5 shadow-xs"
+                        : "border-border hover:border-muted-foreground/30 bg-card"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+                        <Award className="size-5" />
+                      </div>
+                      <div
+                        className={`size-5 rounded-full border flex items-center justify-center ${
+                          sponsorship === "l2e"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-muted-foreground/30"
+                        }`}
+                      >
+                        {sponsorship === "l2e" && <Check className="size-3" />}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <h3 className="font-bold text-base">Learn2Earn Sponsored</h3>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Zero tuition upfront with monthly stipend package, campus support, and learning wallet.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* SECTION 2: Personal Information */}
+              <section className="bg-card border rounded-2xl p-6 sm:p-7 shadow-xs">
+                <div className="flex items-center gap-3 pb-5 border-b mb-6">
+                  <div className="size-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                    2
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">Personal Information</h2>
@@ -279,11 +359,11 @@ export default function SinglePageRegister() {
                 )}
               </section>
 
-              {/* SECTION 2: Learning Mode */}
+              {/* SECTION 3: Learning Mode */}
               <section className="bg-card border rounded-2xl p-6 sm:p-7 shadow-xs">
                 <div className="flex items-center gap-3 pb-5 border-b mb-6">
                   <div className="size-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                    2
+                    3
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">Learning Mode</h2>
@@ -358,11 +438,11 @@ export default function SinglePageRegister() {
                 </div>
               </section>
 
-              {/* SECTION 3: Device / Laptop Setup */}
+              {/* SECTION 4: Device / Laptop Setup */}
               <section className="bg-card border rounded-2xl p-6 sm:p-7 shadow-xs">
                 <div className="flex items-center gap-3 pb-5 border-b mb-6">
                   <div className="size-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                    3
+                    4
                   </div>
                   <div>
                     <h2 className="text-lg font-bold">Laptop & Hardware Setup</h2>
@@ -431,12 +511,12 @@ export default function SinglePageRegister() {
                 </div>
               </section>
 
-              {/* SECTION 4: Support Services Package */}
+              {/* SECTION 5: Support Services Package */}
               <section className="bg-card border rounded-2xl p-6 sm:p-7 shadow-xs">
                 <div className="flex items-center justify-between pb-5 border-b mb-6">
                   <div className="flex items-center gap-3">
                     <div className="size-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                      4
+                      5
                     </div>
                     <div>
                       <h2 className="text-lg font-bold">Support Services Menu</h2>
