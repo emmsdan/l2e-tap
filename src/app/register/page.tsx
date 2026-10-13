@@ -35,19 +35,15 @@ export default function Register() {
       eyebrow: "Your setup",
       grants: "",
     },
-    ...(!answers["hasLaptop"]
-      ? [
-          {
-            key: "needLaptop",
-            title: "Would you like us to provide one?",
-            helper: "A work-ready machine issued to you for the programme.",
-            yes: "Yes, provide a laptop",
-            no: "No, I'll sort it myself",
-            eyebrow: "Your setup",
-            grants: "laptop",
-          },
-        ]
-      : []),
+    {
+      key: "needLaptop",
+      title: "Would you like us to provide one?",
+      helper: "A work-ready machine issued to you for the programme.",
+      yes: "Yes, provide a laptop",
+      no: "No, I'll sort it myself",
+      eyebrow: "Your setup",
+      grants: "laptop",
+    },
     ...(mode === "onsite"
       ? [
           {
@@ -117,9 +113,10 @@ export default function Register() {
     },
   ];
 
+  // step 0: basics, step 1: mode, steps 2..(questions.length + 1): questions, step questions.length + 2: summary
   const count = mode ? questions.length + 3 : 3;
   const q = questions[step - 2];
-  const summary = step === count - 1 && step > 1;
+  const summary = step === questions.length + 2;
   const selected = questions.filter((item) => item.grants && answers[item.key]).map((item) => item.grants);
   const spent = total(selected, data.catalog);
   const valid =
@@ -287,8 +284,19 @@ export default function Register() {
                   variant="outline"
                   className={answers[q.key] === a ? "choice choice-active" : "choice"}
                   onClick={() => {
-                    setAnswers({ ...answers, [q.key]: a });
-                    setStep(step + 1);
+                    const newAnswers = { ...answers, [q.key]: a };
+                    // If student already has a laptop, ensure needLaptop is false
+                    if (q.key === "hasLaptop" && a === true) {
+                      newAnswers["needLaptop"] = false;
+                    }
+                    setAnswers(newAnswers);
+
+                    // If on hasLaptop and user answers YES (they own a laptop), skip the needLaptop question
+                    if (q.key === "hasLaptop" && a === true) {
+                      setStep(step + 2);
+                    } else {
+                      setStep(step + 1);
+                    }
                   }}
                 >
                   {a ? <Check /> : <X />}
@@ -304,7 +312,19 @@ export default function Register() {
           ) : null}
 
           <div className="flex justify-between mt-10 gap-4">
-            <Button variant="ghost" onClick={() => (step ? setStep(step - 1) : router.push("/"))}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                if (step === 0) {
+                  router.push("/");
+                } else if (step === 4 && answers["hasLaptop"]) {
+                  // If we skipped step 3 (needLaptop) because user has a laptop, step back to step 2 (hasLaptop)
+                  setStep(2);
+                } else {
+                  setStep(step - 1);
+                }
+              }}
+            >
               <ArrowLeft />
               Back
             </Button>
