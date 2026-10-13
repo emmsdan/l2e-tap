@@ -157,9 +157,17 @@ export default function Register() {
           <Link href="/">
             <Image className="brand-logo" src="/logo.svg" alt="Learn2Earn" width={104} height={40} priority />
           </Link>
-          <span className="text-sm text-muted-foreground">
-            Step {step + 1} of {count}
-          </span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/register/single"
+              className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Single-page form
+            </Link>
+            <span className="text-sm text-muted-foreground">
+              Step {step + 1} of {count}
+            </span>
+          </div>
         </div>
         <progress className="wizard-progress" max={count} value={step + 1} />
       </header>
